@@ -1,0 +1,239 @@
+\section{Вспомогательные неравенства}\label{app:tools}
+
+В этом приложении доказаны лемма~\ref{lem:class} и вспомогательные леммы раздела~\ref{sec:upper}. В подразделе~\ref{app:tools-class} функция $\ell$ произвольна, как в определении~\ref{def:class}. Начиная с подраздела~\ref{app:tools-gronwall}, $f\in\F_{L_0,L_1}^d$, а $x^\ast$ --- точка минимума функции $f$.
+
+\subsection{Характеризация класса}\label{app:tools-class}
+
+\begin{proof}[Доказательство леммы~\ref{lem:class}\proofup{lem:class}]
+\leavevmode
+\begin{itemize}
+\item \emph{Необходимость в~(а).} Градиент выпуклой дифференцируемой функции непрерывен \citep[теорема~25.5]{rockafellar1970convex}, поэтому на каждом шаре он ограничен некоторым числом $M$. Если отрезок $[x,y]$ лежит в таком шаре, то по~\eqref{eq:class}
+\[
+ \norm{\nabla f(x)-\nabla f(y)}\le\ell(M)\norm{x-y} .
+\]
+Значит, отображение $t\mapsto\nabla f(x+tv)$ липшицево на каждом отрезке, а потому локально абсолютно непрерывно и дифференцируемо при почти всех $t$. В такой точке $t$ применим~\eqref{eq:class} к точкам $x+tv$ и $x+(t+h)v$, разделим на $|h|$ и устремим $h$ к нулю. В силу непрерывности $\nabla f$ и $\ell$ получим~\eqref{eq:line-derivative}.
+\item \emph{Достаточность в~(а).} Пусть $v=y-x$. По формуле Ньютона--Лейбница и монотонности $\ell$
+\begin{align*}
+ \norm{\nabla f(y)-\nabla f(x)}
+ &\le\int_0^1\ell\bigl(\norm{\nabla f(x+tv)}\bigr)\norm v\,dt\\
+ &\le\ell\Bigl(\sup_{u\in[x,y]}\norm{\nabla f(u)}\Bigr)\norm{x-y} .
+\end{align*}
+\item \emph{Утверждение~(б).} Для $f\in C^2$ производная отображения $t\mapsto\nabla f(x+tv)$ равна $\nabla^2f(x+tv)v$ и непрерывна по $t$. Поэтому условие~\eqref{eq:line-derivative} при почти всех $t$ равносильно неравенству
+\[
+ \norm{\nabla^2f(x)v}\le\ell\bigl(\norm{\nabla f(x)}\bigr)\norm v
+\]
+при всех $x$ и $v$. Гессиан выпуклой функции класса $C^2$ --- симметричная неотрицательно определённая матрица, и для неё это неравенство равносильно~\eqref{eq:hessian-bound}. Остаётся применить~(а).\qedhere
+\end{itemize}
+\end{proof}
+
+\subsection{Скорость изменения градиента}\label{app:tools-gronwall}
+
+Следующая лемма показывает, что локальная константа гладкости $L_0+L_1\norm{\nabla f(y)}$ при переходе от точки $y$ к точке $z$ меняется не более чем в $e^{L_1\norm{z-y}}$ раз. Остальные оценки приложения выводятся из этого факта.
+
+\begin{lemma}[следствия леммы Гронуолла]\label{lem:gronwall}
+Для любых точек $y,z\in\R^d$ выполнены неравенства
+\begin{align*}
+ &(\text{а})&L_0+L_1\norm{\nabla f(z)}&\le\bigl(L_0+L_1\norm{\nabla f(y)}\bigr)e^{L_1\norm{z-y}},\\
+ &(\text{б})&\norm{\nabla f(z)-\nabla f(y)}&\le\bigl(L_0+L_1\norm{\nabla f(y)}\bigr)\frac{e^{L_1\norm{z-y}}-1}{L_1},\\
+ &(\text{в})&0\le f(z)-f(y)-\ip{\nabla f(y)}{z-y}&\le\bigl(L_0+L_1\norm{\nabla f(y)}\bigr)\frac{e^{L_1\norm{z-y}}-1-L_1\norm{z-y}}{L_1^2} .
+\end{align*}
+\end{lemma}
+
+\begin{proof}
+Будем следить за градиентом в точках $y+t(z-y)$, $t\in[0,1]$.
+\begin{itemize}
+\item \emph{Интегральное неравенство.} По лемме~\ref{lem:class}(а) отображение $t\mapsto\nabla f(y+t(z-y))$ абсолютно непрерывно, и при почти всех $t$ норма его производной не больше $(L_0+L_1\norm{\nabla f(y+t(z-y))})\norm{z-y}$. Поэтому при всех $t\in[0,1]$
+\begin{equation}\label{eq:gronwall-int}
+ \norm{\nabla f\bigl(y+t(z-y)\bigr)-\nabla f(y)}\le\norm{z-y}\int_0^t\Bigl(L_0+L_1\norm{\nabla f\bigl(y+\tau(z-y)\bigr)}\Bigr)d\tau .
+\end{equation}
+По неравенству треугольника отсюда следует
+\begin{align*}
+ \MoveEqLeft L_0+L_1\norm{\nabla f\bigl(y+t(z-y)\bigr)}\\
+ &\le L_0+L_1\norm{\nabla f(y)}+L_1\norm{z-y}\int_0^t\Bigl(L_0+L_1\norm{\nabla f\bigl(y+\tau(z-y)\bigr)}\Bigr)d\tau .
+\end{align*}
+\item \emph{Лемма Гронуолла.} Левая часть последнего неравенства непрерывна по $t$, и по лемме Гронуолла в интегральной форме
+\[
+ L_0+L_1\norm{\nabla f\bigl(y+t(z-y)\bigr)}\le\bigl(L_0+L_1\norm{\nabla f(y)}\bigr)e^{L_1\norm{z-y}t} .
+\]
+При $t=1$ это утверждение~(а).
+\item \emph{Приращение градиента.} Подставим эту оценку в~\eqref{eq:gronwall-int}:
+\begin{align*}
+ \norm{\nabla f\bigl(y+t(z-y)\bigr)-\nabla f(y)}
+ &\le\bigl(L_0+L_1\norm{\nabla f(y)}\bigr)\norm{z-y}\int_0^te^{L_1\norm{z-y}\tau}d\tau\\
+ &=\bigl(L_0+L_1\norm{\nabla f(y)}\bigr)\frac{e^{L_1\norm{z-y}t}-1}{L_1} .
+\end{align*}
+При $t=1$ это утверждение~(б).
+\item \emph{Приращение функции.} Левое неравенство в~(в) --- это выпуклость функции $f$. Для правого
+\begin{align*}
+ f(z)-f(y)-\ip{\nabla f(y)}{z-y}
+ &=\int_0^1\ip{\nabla f\bigl(y+t(z-y)\bigr)-\nabla f(y)}{z-y}\,dt\\
+ &\by{\le}{(\text{б})}\bigl(L_0+L_1\norm{\nabla f(y)}\bigr)\norm{z-y}\int_0^1\frac{e^{L_1\norm{z-y}t}-1}{L_1}\,dt\\
+ &=\bigl(L_0+L_1\norm{\nabla f(y)}\bigr)\frac{e^{L_1\norm{z-y}}-1-L_1\norm{z-y}}{L_1^2} .
+\end{align*}
+Во втором переходе использованы неравенство КБШ и утверждение~(б).\qedhere
+\end{itemize}
+\end{proof}
+
+Для дважды непрерывно дифференцируемых функций неравенства~(б) и~(в) получены в работе \citet[лемма~2.5]{vankov2025optimizing}. Из неравенства $e^x-1-x\le x^2e^x/2$ при $x\ge0$ и утверждения~(в) следует
+\begin{equation}\label{eq:local-descent}
+ f(z)\le f(y)+\ip{\nabla f(y)}{z-y}+\frac{\bigl(L_0+L_1\norm{\nabla f(y)}\bigr)e^{L_1\norm{z-y}}}2\,\norm{z-y}^2 .
+\end{equation}
+На расстояниях порядка $1/L_1$ это обычное неравенство для функций с липшицевым градиентом \citep[лемма~1.2.3]{nesterov2018lectures} с константой, пропорциональной $L_0+L_1\norm{\nabla f(y)}$.
+
+\subsection{Лемма о спуске}\label{app:tools-descent}
+
+\begin{proof}[Доказательство леммы~\ref{lem:safe-step}\proofup{lem:safe-step}]
+\leavevmode
+\begin{itemize}
+\item \emph{Убывание функции.} Так как $L_0+L_1\norm{\nabla f(y)}\ge L_1\norm{\nabla f(y)}$, длина шага
+\[
+ \norm{y^+-y}=\frac{\norm{\nabla f(y)}}{4\bigl(L_0+L_1\norm{\nabla f(y)}\bigr)}
+\]
+не больше $1/(4L_1)$, и множитель $e^{L_1\norm{y^+-y}}$ в~\eqref{eq:local-descent} не больше $e^{1/4}$. Поэтому
+\begin{align*}
+ f(y^+)
+ &\by{\le}{\eqref{eq:local-descent}}f(y)-\frac{\norm{\nabla f(y)}^2}{4\bigl(L_0+L_1\norm{\nabla f(y)}\bigr)}+\frac{e^{1/4}\norm{\nabla f(y)}^2}{32\bigl(L_0+L_1\norm{\nabla f(y)}\bigr)}\\
+ &\bypad{=}{}{\eqref{eq:local-descent}}f(y)-\Bigl(\frac14-\frac{e^{1/4}}{32}\Bigr)\frac{\norm{\nabla f(y)}^2}{L_0+L_1\norm{\nabla f(y)}}\\
+ &\bypad{\le}{(\mathrm a)}{\eqref{eq:local-descent}}f(y)-\frac{5\norm{\nabla f(y)}^2}{24\bigl(L_0+L_1\norm{\nabla f(y)}\bigr)} .
+\end{align*}
+Здесь (а) --- неравенство $e^{1/4}<4/3$, которое следует из $e^t\le1/(1-t)$ при $0\le t<1$.
+\item \emph{Убывание расстояния до точки минимума.} Имеем
+\begin{align*}
+ \ip{\nabla f(y)}{y-x^\ast}
+ &\by{\ge}{(\mathrm б)}f(y)-f^\ast
+ \by{\ge}{(\mathrm в)}f(y)-f(y^+)\\
+ &\by{\ge}{(\mathrm г)}\frac{5\norm{\nabla f(y)}^2}{24\bigl(L_0+L_1\norm{\nabla f(y)}\bigr)} ,
+\end{align*}
+где (б) --- выпуклость, (в) --- неравенство $f(y^+)\ge f^\ast$, (г) --- уже доказанное убывание функции.
+Раскрывая квадрат нормы и подставляя эту оценку, получаем
+\begin{align*}
+ \norm{y^+-x^\ast}^2
+ &=\norm{y-x^\ast}^2-\frac{\ip{\nabla f(y)}{y-x^\ast}}{2\bigl(L_0+L_1\norm{\nabla f(y)}\bigr)}+\frac{\norm{\nabla f(y)}^2}{16\bigl(L_0+L_1\norm{\nabla f(y)}\bigr)^2}\\
+ &\le\norm{y-x^\ast}^2-\frac{5\norm{\nabla f(y)}^2}{48\bigl(L_0+L_1\norm{\nabla f(y)}\bigr)^2}+\frac{3\norm{\nabla f(y)}^2}{48\bigl(L_0+L_1\norm{\nabla f(y)}\bigr)^2} .\qedhere
+\end{align*}
+\end{itemize}
+\end{proof}
+
+\subsection{Оценки в окрестности точки минимума}\label{app:tools-anchored}
+
+В точке минимума градиент равен нулю, поэтому лемма~\ref{lem:gronwall} при $y=x^\ast$ даёт оценку роста функции при удалении от точки минимума.
+
+\begin{lemma}[рост вокруг точки минимума]\label{lem:radial}
+Для любой точки $x\in\R^d$
+\begin{align*}
+ \norm{\nabla f(x)}&\le\frac{L_0}{L_1}\bigl(e^{L_1\norm{x-x^\ast}}-1\bigr),\\
+ f(x)-f^\ast&\le\frac{L_0}{L_1^2}\bigl(e^{L_1\norm{x-x^\ast}}-1-L_1\norm{x-x^\ast}\bigr).
+\end{align*}
+В частности, если $\norm{x^0-x^\ast}\le R$, то
+\begin{equation}\label{eq:radial-gap}
+ f(x^0)-f^\ast\le\frac{L_0}{L_1^2}\bigl(e^{L_1R}-1-L_1R\bigr).
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+Обе оценки --- утверждения~(б) и~(в) леммы~\ref{lem:gronwall} при $y=x^\ast$ и $z=x$, поскольку $\nabla f(x^\ast)=0$. Правая часть второй оценки возрастает по $\norm{x-x^\ast}$, что даёт~\eqref{eq:radial-gap}.
+\end{proof}
+
+Оценка~\eqref{eq:radial-gap} точна. Функция
+\[
+ f(x)=\frac{L_0}{L_1^2}\bigl(e^{L_1\norm x}-1-L_1\norm x\bigr)
+\]
+дважды непрерывно дифференцируема, и
+\[
+ \norm{\nabla f(x)}=\frac{L_0}{L_1}\bigl(e^{L_1\norm x}-1\bigr).
+\]
+При $x\ne0$ её кривизна вдоль радиуса равна
+\[
+ L_0e^{L_1\norm x}=L_0+L_1\norm{\nabla f(x)} ,
+\]
+а в касательных направлениях кривизна равна
+\[
+ \frac{\norm{\nabla f(x)}}{\norm x}=\frac{L_0\bigl(e^{L_1\norm x}-1\bigr)}{L_1\norm x}\le L_0e^{L_1\norm x} ,
+\]
+поскольку $e^s-1\le se^s$. В нуле гессиан равен $L_0I$, и обе кривизны стремятся к $L_0$. По лемме~\ref{lem:class}(б) функция лежит в классе $\F_{L_0,L_1}^d$, а при $\norm{x^0}=R$ в~\eqref{eq:radial-gap} достигается равенство. Таким образом, начальная невязка по функции может быть экспоненциально большой по $L_1R$.
+
+\begin{proof}[Доказательство леммы~\ref{lem:anchored}\proofup{lem:anchored}]
+При $\nabla f(y)=0$ утверждение совпадает с неравенством выпуклости. Пусть $\nabla f(y)\ne0$. Сравним касательную в точке $y$ с оценкой роста леммы~\ref{lem:radial} в точках луча
+\[
+ z_t=x^\ast+\frac{t\,\nabla f(y)}{\norm{\nabla f(y)}},
+\]
+где $t\ge0$.
+\begin{itemize}
+\item \emph{Оценка при фиксированном $t$.} Так как $\ip{\nabla f(y)}{z_t-x^\ast}=t\norm{\nabla f(y)}$,
+\begin{align*}
+ f(y)+\ip{\nabla f(y)}{x^\ast-y}+t\norm{\nabla f(y)}
+ &\bypad{=}{}{(\mathrm a)}f(y)+\ip{\nabla f(y)}{z_t-y}\\
+ &\by{\le}{(\mathrm a)}f(z_t)
+ \by{\le}{(\mathrm б)}f^\ast+\frac{L_0}{L_1^2}\bigl(e^{L_1t}-1-L_1t\bigr),
+\end{align*}
+где (а) --- выпуклость, (б) --- лемма~\ref{lem:radial}.
+\item \emph{Выбор $t$.} Положим
+\[
+ t=\frac1{L_1}\log\Bigl(1+\frac{L_1\norm{\nabla f(y)}}{L_0}\Bigr).
+\]
+Тогда
+\[
+ e^{L_1t}=1+\frac{L_1\norm{\nabla f(y)}}{L_0},
+\]
+и прямое вычисление по формуле~\eqref{eq:Phi} даёт
+\[
+ t\norm{\nabla f(y)}-\frac{L_0}{L_1^2}\bigl(e^{L_1t}-1-L_1t\bigr)=\Phi\bigl(\norm{\nabla f(y)}\bigr).
+\]
+Подставляя это в предыдущую оценку, получаем утверждение леммы.\qedhere
+\end{itemize}
+\end{proof}
+
+Выбранное $t$ максимизирует левую часть последнего равенства, то есть $\Phi$ --- функция, сопряжённая к функции роста из леммы~\ref{lem:radial}. Неравенство леммы~\ref{lem:anchored} утверждается только в точке $x^\ast$: аффинная функция с добавкой $\Phi$ не обязана быть минорантой функции $f$ всюду.
+
+\subsection{Неточный одномерный поиск}\label{app:tools-search}
+
+\begin{proof}[Доказательство леммы~\ref{lem:search}\proofup{lem:search}]
+Обозначим через $z(t)=v+t(x-v)$ точки отрезка $[v,x]$. Функция $t\mapsto f(z(t))$ выпукла на $[0,1]$, а её производная $\ip{\nabla f(z(t))}{x-v}$ не убывает. Для точки $y=z(t)$
+\[
+ \ip{\nabla f(y)}{y-v}=t\,\ip{\nabla f(z(t))}{x-v} .
+\]
+\begin{itemize}
+\item \emph{Критерий остановки.} Если он сработал в точке $z\in[v,x]$, то $z$ лежит в шаре $B(x^\ast,r)$, и по выпуклости
+\[
+ f(z)-f^\ast\le\ip{\nabla f(z)}{z-x^\ast}\le r\norm{\nabla f(z)}\le\delta .
+\]
+Далее считаем, что критерий остановки не сработал.
+\item \emph{Возврат в концах отрезка.} Если $\ip{\nabla f(v)}{x-v}\ge0$, то производная неотрицательна на $[0,1]$. Значит, $f(v)\le f(x)$, а для $y=v$ левая часть второго неравенства~\eqref{eq:search} равна нулю. Если $\ip{\nabla f(x)}{x-v}\le0$, то для $y=x$ первое неравенство~\eqref{eq:search} очевидно, а левая часть второго неположительна.
+\item \emph{Деление отрезка пополам.} Алгоритм поддерживает неравенства
+\[
+ \ip{\nabla f(z(t_-))}{x-v}<0<\ip{\nabla f(z(t_+))}{x-v} .
+\]
+Если в середине производная равна нулю, то эта середина --- точка минимума функции на отрезке, и для неё выполнены оба неравенства~\eqref{eq:search}. Иначе после $m$ шагов $t_+-t_-=2^{-m}$.
+\item \emph{Убывание для $y=z(t_+)$.} Производная в точке $t_+$ положительна, поэтому функция не убывает на $[t_+,1]$, и $f(y)\le f(x)$.
+\item \emph{Погрешность для $y=z(t_+)$.} Расстояние между точками $z(t_+)$ и $z(t_-)$ равно $2^{-m}\norm{x-v}$, причём $\norm{x-v}\le2r$. По условию~\eqref{eq:search-m}
+\[
+ L_1\norm{z(t_+)-z(t_-)}\le2^{1-m}L_1r\le\frac{2L_1r}{128\bigl(1+L_1r\bigr)^2}\le\frac1{32} .
+\]
+По лемме~\ref{lem:gronwall}(б) с базовой точкой $z(t_+)$ и неравенству $e^s-1\le se^s$
+\[
+ \norm{\nabla f(z(t_+))-\nabla f(z(t_-))}\le2\bigl(L_0+L_1\norm{\nabla f(y)}\bigr)\norm{z(t_+)-z(t_-)} .
+\]
+Так как $\ip{\nabla f(z(t_-))}{x-v}<0$ и $t_+\le1$,
+\begin{align*}
+ \ip{\nabla f(y)}{y-v}
+ &\bypad{\le}{}{\eqref{eq:search-m}}t_+\ip{\nabla f(z(t_+))-\nabla f(z(t_-))}{x-v}\\
+ &\bypad{\le}{(\mathrm a)}{\eqref{eq:search-m}}2r\norm{\nabla f(z(t_+))-\nabla f(z(t_-))}\\
+ &\bypad{\le}{}{\eqref{eq:search-m}}2^{3-m}r^2\bigl(L_0+L_1\norm{\nabla f(y)}\bigr)\\
+ &\by{\le}{\eqref{eq:search-m}}\frac{r^2\bigl(L_0+L_1\norm{\nabla f(y)}\bigr)}{16\bigl(1+L_0r^2/\delta+L_1r\bigr)^2} ,
+\end{align*}
+где (а) --- неравенства $t_+\le1$ и $\norm{x-v}\le2r$.
+\item \emph{Связь с градиентом.} В точке $y$ критерий остановки не выполнен, то есть $r\norm{\nabla f(y)}>\delta$. Поэтому
+\begin{align*}
+ \frac{r\bigl(L_0+L_1\norm{\nabla f(y)}\bigr)}{\norm{\nabla f(y)}}
+ &\bypad{=}{}{(\mathrm б)}\frac{L_0r}{\norm{\nabla f(y)}}+L_1r\\
+ &\by{<}{(\mathrm б)}\frac{L_0r^2}\delta+L_1r
+ <1+\frac{L_0r^2}\delta+L_1r ,
+\end{align*}
+где (б) --- неравенство $r\norm{\nabla f(y)}>\delta$. Возводя в квадрат и деля на $16(L_0+L_1\norm{\nabla f(y)})$, получаем
+\[
+ \frac{r^2\bigl(L_0+L_1\norm{\nabla f(y)}\bigr)}{16\bigl(1+L_0r^2/\delta+L_1r\bigr)^2}<\frac{\norm{\nabla f(y)}^2}{16\bigl(L_0+L_1\norm{\nabla f(y)}\bigr)} ,
+\]
+и второе неравенство~\eqref{eq:search} выполнено.
+\item \emph{Число обращений.} Алгоритм делает два обращения в концах отрезка и не более $m$ обращений в серединах.\qedhere
+\end{itemize}
+\end{proof}

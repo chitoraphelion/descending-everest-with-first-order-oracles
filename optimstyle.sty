@@ -253,6 +253,11 @@
 % Line anchors include the algorithm number (no duplicate PDF destinations).
 \AtBeginDocument{\providecommand{\theHALG@line}{}%
   \renewcommand{\theHALG@line}{\thealgorithm.\arabic{ALG@line}}}
+% Float rules are assembled outside the body color group; reset inherited color.
+\apptocmd{\fs@ruled}{%
+  \preto{\@fs@pre}{\begingroup\normalcolor}\appto{\@fs@pre}{\endgroup}%
+  \preto{\@fs@mid}{\begingroup\normalcolor}\appto{\@fs@mid}{\endgroup}%
+  \preto{\@fs@post}{\begingroup\normalcolor}\appto{\@fs@post}{\endgroup}}{}{}
 \floatstyle{ruled}\restylefloat{algorithm}
 \algrenewcommand\alglinenumber[1]{\scriptsize\color{optimMuted}#1:}
 \algrenewcommand\algorithmicrequire{\textbf{Input:}}

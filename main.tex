@@ -33,42 +33,23 @@
 % Название: обе строки одним шрифтом, между прежним заголовком (19pt) и подзаголовком.
 \renewcommand{\optimtitlefont}{\fontsize{16}{21}\selectfont\bfseries\boldmath}
 \title{«Спуск с Эвереста»\texorpdfstring{\\[3pt]}{: }Оракульная сложность выпуклой оптимизации\texorpdfstring{\\}{ }при \texorpdfstring{$(L_0,L_1)$}{(L0,L1)}-гладкости}
-% Авторы: две колонки равной ширины, симметрично относительно центра.
-\author{\begin{tabular}{@{}wc{.47\linewidth}wc{.47\linewidth}@{}}
-  \begin{tabular}[t]{@{}c@{}}
-   Михаил Рудоманов\textsuperscript{\,\faMountain}\\
-   {\small МФТИ}\\
-   {\small Москва, Россия}\\
-   {\small\email{rudomanov.ma@phystech.edu}}
-  \end{tabular} &
-  \begin{tabular}[t]{@{}c@{}}
-   Иван Фомин\textsuperscript{\,\faMountain}\\
-   {\small Яндекс}\\
-   {\small Москва, Россия}\\
-   {\small\email{fomin.iva2017@gmail.com}}
-  \end{tabular} \\ \noalign{\vskip 10pt}
-  \begin{tabular}[t]{@{}c@{}}
-   Александр Владимирович Гасников\\
-   {\small Университет Иннополис}\\
-   {\small Иннополис, Россия}\\
-   {\small\email{gasnikov@yandex.ru}}
-  \end{tabular} &
-  \begin{tabular}[t]{@{}c@{}}
-   Федор Сергеевич Стонякин\\
-   {\small МФТИ}\\
-   {\small Москва, Россия}\\
-   {\small КФУ им.~В.\,И.~Вернадского}\\
-   {\small Симферополь, Россия}\\
-   {\small\email{fedyor@mail.ru}}
-  \end{tabular}
-\end{tabular}}
-\affiliations{\textsuperscript{\faMountain}\,Равный вклад.}
+% В шапке только имена; аффилиации и почты вынесены в сноски.
+\author{%
+  Михаил Рудоманов\thanks{MIRIAI, Moscow Independent Research Institute of Artificial Intelligence, Москва, Россия. \email{rudomanov.ma@phystech.edu}.}\,\thanks{Равный вклад.}\quad
+  Иван Фомин\thanks{Яндекс, Москва, Россия. \email{fomin.iva2017@gmail.com}.}\,\footnotemark[2]\\[4pt]
+  Александр Владимирович Гасников\thanks{Университет Иннополис, Иннополис, Россия; МФТИ, Москва, Россия. \email{gasnikov@yandex.ru}.}\quad
+  Федор Сергеевич Стонякин\thanks{МФТИ, Москва, Россия; КФУ им.~В.\,И.~Вернадского, Симферополь, Россия. \email{fedyor@mail.ru}.}}
 \keywords{$(L_0,L_1)$-гладкость, обобщённая гладкость, выпуклая оптимизация, оракульная сложность, нижние оценки, ускоренные методы, неточный одномерный поиск, методы первого порядка.}
 \date{}
 
 \begin{document}
 
+\begingroup
+\makeatletter
+\renewcommand{\@fnsymbol}[1]{\ensuremath{\ifcase#1\or\spadesuit\or\text{\tiny\faMountain}\or\clubsuit\or\dagger\or\ddagger\fi}}
+\makeatother
 \maketitle
+\endgroup
 
 \begin{abstract}
 Для выпуклых $(L_0,L_1)$-гладких функций кривизна может расти вместе с нормой градиента. Поэтому даже при $\norm{x^0-x^\ast}\le R$ градиент и невязка по функции в начальной точке могут быть экспоненциально большими по $L_1R$, и оценка $\sqrt{L_0R^2/\varepsilon}$, известная для ускоренного метода на функциях с липшицевым градиентом, уже не описывает сложность задачи. Мы находим оракульную сложность этого класса для произвольных детерминированных методов первого порядка: при $L_0R^2/\varepsilon\ge1$ оптимальное число обращений к оракулу $N$ удовлетворяет соотношению $1+N=\widetilde\Theta\bigl(\sqrt{L_0R^2/\varepsilon}+L_1R\bigr)$. Верхняя оценка имеет вид $O\bigl(\sqrt{L_0R^2/\varepsilon}+(1+L_1R)\log(2+L_1R)\bigr)$: метод сначала проходит режим больших градиентов за $O(1+L_1R)$ итераций с неточным одномерным поиском, а затем работает обычный ускоренный метод с постоянным шагом. Нижняя оценка получена с помощью цепочек и принципа ортогональной инвариантности на функциях, сопряжённых к сильно выпуклым функциям на многограннике. Если начальная невязка не больше $4\varepsilon$, то оптимальная оценка принимает вид $1+N=\widetilde\Theta\bigl(\sqrt{L_0R^2/\varepsilon}+(L_1R)^{2/3}\bigr)$.
