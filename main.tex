@@ -1,0 +1,1011 @@
+% Компиляция: latexmk -xelatex main.tex
+\documentclass[11pt,a4paper]{article}
+\usepackage[round,authoryear,comma]{natbib}
+\usepackage[russian]{optimstyle}
+% Русский шрифт --- CMU Serif (Computer Modern с кириллицей) из optimstyle.sty.
+\usepackage{tabularx,pifont,calc,fontawesome5}
+
+\newcommand{\R}{\mathbb R}
+\newcommand{\F}{\mathcal F}
+\newcommand{\ip}[2]{\langle #1,#2\rangle}
+\newcommand{\norm}[1]{\|#1\|}
+\DeclareMathOperator{\argmin}{arg\,min}
+
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+
+\newcommand{\yes}{\textcolor{green!55!black}{\ding{51}}}
+\newcommand{\no}{\textcolor{red!80!black}{\ding{55}}}
+
+% Списки только с треугольниками; формулы в строке не переносятся.
+\setlist[itemize]{label=$\vartriangleright$}
+\relpenalty=10000 \binoppenalty=10000 \emergencystretch=10em
+% Знак отношения с обоснованием под ним: \by{\le}{\eqref{eq:x}}.
+\newcommand{\by}[2]{\mathrel{\underset{#2}{#1}}}
+% То же, но подпись занимает ширину эталона #3: знаки в одном столбце выравниваются.
+\newcommand{\bypad}[3]{\mathrel{\underset{\mathmakebox[\widthof{$\scriptstyle#3$}]{#2}}{#1}}}
+% Заголовок утверждения не остаётся один внизу страницы.
+\BeforeBeginEnvironment{theorem}{\Needspace{6\baselineskip}}
+\BeforeBeginEnvironment{lemma}{\Needspace{6\baselineskip}}
+\BeforeBeginEnvironment{proposition}{\Needspace{6\baselineskip}}
+\BeforeBeginEnvironment{definition}{\Needspace{6\baselineskip}}
+
+% Название: обе строки одним шрифтом, между прежним заголовком (19pt) и подзаголовком.
+\renewcommand{\optimtitlefont}{\fontsize{16}{21}\selectfont\bfseries\boldmath}
+\title{«Спуск с Эвереста»\texorpdfstring{\\[3pt]}{: }Оракульная сложность выпуклой оптимизации\texorpdfstring{\\}{ }при \texorpdfstring{$(L_0,L_1)$}{(L0,L1)}-гладкости}
+% Авторы: две колонки равной ширины, симметрично относительно центра.
+\author{\begin{tabular}{@{}wc{.47\linewidth}wc{.47\linewidth}@{}}
+  \begin{tabular}[t]{@{}c@{}}
+   Михаил Рудоманов\textsuperscript{\,\faMountain}\\
+   {\small МФТИ}\\
+   {\small Москва, Россия}\\
+   {\small\email{rudomanov.ma@phystech.edu}}
+  \end{tabular} &
+  \begin{tabular}[t]{@{}c@{}}
+   Иван Фомин\textsuperscript{\,\faMountain}\\
+   {\small Яндекс}\\
+   {\small Москва, Россия}\\
+   {\small\email{fomin.iva2017@gmail.com}}
+  \end{tabular} \\ \noalign{\vskip 10pt}
+  \begin{tabular}[t]{@{}c@{}}
+   Александр Владимирович Гасников\\
+   {\small Университет Иннополис}\\
+   {\small Иннополис, Россия}\\
+   {\small\email{gasnikov@yandex.ru}}
+  \end{tabular} &
+  \begin{tabular}[t]{@{}c@{}}
+   Федор Сергеевич Стонякин\\
+   {\small МФТИ}\\
+   {\small Москва, Россия}\\
+   {\small КФУ им.~В.\,И.~Вернадского}\\
+   {\small Симферополь, Россия}\\
+   {\small\email{fedyor@mail.ru}}
+  \end{tabular}
+\end{tabular}}
+\affiliations{\textsuperscript{\faMountain}\,Равный вклад.}
+\keywords{$(L_0,L_1)$-гладкость, обобщённая гладкость, выпуклая оптимизация, оракульная сложность, нижние оценки, ускоренные методы, неточный одномерный поиск, методы первого порядка.}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Для выпуклых $(L_0,L_1)$-гладких функций кривизна может расти вместе с нормой градиента. Поэтому даже при $\norm{x^0-x^\ast}\le R$ градиент и невязка по функции в начальной точке могут быть экспоненциально большими по $L_1R$, и оценка $\sqrt{L_0R^2/\varepsilon}$, известная для ускоренного метода на функциях с липшицевым градиентом, уже не описывает сложность задачи. Мы находим оракульную сложность этого класса для произвольных детерминированных методов первого порядка: при $L_0R^2/\varepsilon\ge1$ оптимальное число обращений к оракулу $N$ удовлетворяет соотношению $1+N=\widetilde\Theta\bigl(\sqrt{L_0R^2/\varepsilon}+L_1R\bigr)$. Верхняя оценка имеет вид $O\bigl(\sqrt{L_0R^2/\varepsilon}+(1+L_1R)\log(2+L_1R)\bigr)$: метод сначала проходит режим больших градиентов за $O(1+L_1R)$ итераций с неточным одномерным поиском, а затем работает обычный ускоренный метод с постоянным шагом. Нижняя оценка получена с помощью цепочек и принципа ортогональной инвариантности на функциях, сопряжённых к сильно выпуклым функциям на многограннике. Если начальная невязка не больше $4\varepsilon$, то оптимальная оценка принимает вид $1+N=\widetilde\Theta\bigl(\sqrt{L_0R^2/\varepsilon}+(L_1R)^{2/3}\bigr)$.
+\end{abstract}
+
+% Disclosure: использование языковых моделей
+\begin{tcolorbox}[
+  optimbox,
+  colback=optimBlue!3!white,
+  colframe=optimBlue!40!white,
+  borderline west={1.4pt}{0pt}{optimBlue},
+  top=7pt,bottom=7pt
+]
+\small
+\noindent\textbf{Использование языковых моделей.}\enspace
+При получении теоретических результатов настоящей работы использовались
+модели \textit{Codex Astra 6} и \textit{Claude Opus 5.5}.
+Они также применялись при подготовке и вёрстке рукописи и для перевода
+исходного текста на английский язык.
+Каждая строка текста отредактирована и проверена авторами.
+Ответственность за корректность всех математических утверждений,
+доказательств и выводов несут исключительно авторы работы.
+\end{tcolorbox}
+
+
+\section{Введение}\label{sec:intro}
+
+Мы рассматриваем задачу безусловной выпуклой оптимизации
+\[
+ f(x)\to\min_{x\in\R^d},
+\]
+где $f:\R^d\to\R$ --- выпуклая дифференцируемая $(L_0,L_1)$-гладкая функция, достигающая минимума $f^\ast$ в некоторой точке\footnote{Точка минимума, вообще говоря, не единственна. Множество $X^\ast=\argmin f$ выпукло и замкнуто, поэтому условие ниже равносильно $\operatorname{dist}(x^0,X^\ast)\le R$, и под $x^\ast$ можно понимать ближайшую к $x^0$ точку минимума.} $x^\ast$. О начальной точке $x^0$ известно лишь, что $\norm{x^0-x^\ast}\le R$.
+
+Для выпуклых задач с $L$-липшицевым градиентом расстояние $R$ до точки минимума ограничивает начальную невязку по функции величиной $LR^2/2$ и задаёт сложность градиентных методов --- классические оценки $LR^2/\varepsilon$ и $\sqrt{LR^2/\varepsilon}$. При обобщённой гладкости это уже не так. Для дважды непрерывно дифференцируемых функций класс $(L_0,L_1)$-гладких выпуклых функций с параметрами $L_0,L_1>0$ задаётся условием
+\[
+ 0\preceq\nabla^2f(x)\preceq\bigl(L_0+L_1\norm{\nabla f(x)}\bigr)I ,
+\]
+то есть кривизне разрешено расти вместе с нормой градиента. Эта модель была предложена для объяснения успеха методов с клиппингом градиента \citep{zhang2019gradient,zhang2020improved} и с тех пор стала одним из стандартных предположений в анализе методов первого порядка.
+
+Условие $(L_0,L_1)$-гладкости было предложено на основе экспериментальных наблюдений при обучении нейронных сетей. В экспериментах с языковой моделью на основе LSTM была обнаружена положительная корреляция между локальной константой гладкости и нормой градиента, что послужило основанием для введения модели с зависимостью $L_0+L_1\norm{\nabla f(x)}$ \citep{zhang2019gradient}. Аналогичная зависимость наблюдалась при обучении трансформеров \citep{crawshaw2022robustness}.
+
+Условие $(L_0,L_1)$-гладкости не требует выпуклости функции. В частности, ему удовлетворяют многочлены одной переменной степени не ниже третьей при подходящем выборе констант $L_0,L_1$ \citep{zhang2019gradient}. Кроме того, соответствующая оценка гессиана выполняется для некоторых задач распределённо-робастной оптимизации после перехода к двойственной переменной и введения штрафа, при определённых предположениях о функции потерь и дивергенции \citep{jin2021non,chen2023generalized}.
+
+В отличие от функций с липшицевым градиентом, расстояние до точки минимума уже не ограничивает невязку по функции квадратичной величиной: в точке на расстоянии $R$ от минимума невязка может достигать $(L_0/L_1^2)\bigl(e^{L_1R}-L_1R-1\bigr)$, то есть быть экспоненциально большой по $L_1R$, и эта оценка достигается (лемма~\ref{lem:radial}). Поэтому, прежде чем метод попадёт в область малых градиентов, где работает привычная теория задач с липшицевым градиентом, ему приходится пройти область больших градиентов. Сколько обращений к оракулу это стоит наилучшему методу первого порядка, если о начальной точке известно только расстояние $R$? В этой работе мы даём ответ: с точностью до логарифмических множителей эта цена равна $L_1R$.
+
+\paragraph{Обозначения.} Через $\varepsilon>0$ обозначается требуемая точность решения задачи по функции: метод должен выдать точку $\hat x$, для которой $f(\hat x)-f^\ast\le\varepsilon$. Знак $\norm{\cdot}$ всюду означает евклидову норму вектора и спектральную норму матрицы, $[x,y]$ --- отрезок с концами $x,y\in\R^d$, $B(x,r)$ --- замкнутый шар радиуса $r$ с центром $x$, КБШ --- неравенство Коши--Буняковского--Шварца. Сумму первых $k$ членов последовательности мы обозначаем соответствующей заглавной буквой: например, $A_k=a_1+\dots+a_k$ и $A_0=0$.
+
+\paragraph{Основной результат.} Мы рассматриваем произвольные детерминированные методы первого порядка: методу разрешено запрашивать градиент в любых точках и выдавать любую точку, а учитывается каждое обращение к оракулу. Мы доказываем, что наименьшее число обращений $N$, при котором существует детерминированный метод первого порядка, решающий задачу для всех функций класса во всех размерностях, удовлетворяет неравенствам\footnote{Здесь и далее нижние оценки доказаны при $L_0R^2\ge\varepsilon$.}
+\begin{align*}
+ 1+N&\ge\frac1{29}\Bigl[1+\sqrt{\frac{L_0R^2}{\varepsilon}}+\frac{L_1R}{\sqrt{\log(2+L_1R)}}\Bigr],\\
+ 1+N&\le5\sqrt{\frac{L_0R^2}{\varepsilon}}+C\,(1+L_1R)\log(2+L_1R)
+\end{align*}
+с абсолютной константой $C$ (теоремы~\ref{thm:upper} и~\ref{thm:lower-radius}). Таким образом, оптимальная сложность равна $\sqrt{L_0R^2/\varepsilon}+L_1R$ с точностью до логарифмических множителей, причём логарифмы стоят только при $L_1R$. Метод верхней оценки использует только градиенты. Нижняя оценка остаётся верной и для методов, которые вместе с градиентом получают значение функции.
+
+\paragraph{Верхняя и нижняя оценки.} Верхняя оценка получена методом из двух этапов. На первом этапе метод SHERPA проходит режим больших градиентов за $O(1+L_1R)$ итераций. Это ускоренный метод с неточным одномерным поиском ICEPICK, построенный по схеме оценивающих последовательностей Нестерова \citep{nesterov2018lectures}. На втором этапе работает обычный ускоренный метод с постоянным шагом $1/(2L_0)$, анализ которого мы берём из работы \citet{tyurin2026accelerated}. Используемый вариант этого метода мы называем CRUISE. Нижняя оценка получена по классической схеме: цепочка и принцип ортогональной инвариантности \citep{nemirovski1983problem,nesterov2018lectures,carmon2020lower}.
+
+\paragraph{Ограниченная начальная невязка.} Если дополнительно известно, что $f(x^0)-f^\ast\le4\varepsilon$, то сложность падает до
+\[
+ 1+N=\widetilde\Theta\Bigl(\sqrt{\frac{L_0R^2}{\varepsilon}}+(L_1R)^{2/3}\Bigr)
+\]
+(приложение~\ref{app:gap}). Противоречия с основным результатом нет: наихудшие функции, на которых получено слагаемое $L_1R$, имеют огромную начальную невязку и в класс с ограниченной невязкой не входят. Этот режим может быть полезен для схем с рестартами: каждый следующий запуск метода начинается из точки, в которой невязка по функции уже ограничена постоянным кратным точности, требуемой от этого запуска, поэтому стоимость одного запуска определяется показателем $2/3$, а не $1$.
+
+\paragraph{Связанные работы.} Обобщение, в котором $L_0+L_1\norm{\nabla f(x)}$ заменяется произвольной функцией $\ell(\norm{\nabla f(x)})$, изучалось в работах \citet{li2023generalized,tyurin2025unified}. Мы ограничиваемся аффинным случаем. Гарантии сходимости градиентных методов в выпуклом случае получены в работах \citet{gorbunov2024methods,vankov2025optimizing,lobanov2025linear}, ускоренные методы рассматривались в работах \citet{gorbunov2024methods,vankov2025optimizing,tyurin2026accelerated,borodich2026graal}. Нижние оценки для функций с липшицевым градиентом и произвольных методов первого порядка обсуждаются, например, в работе \citet{guzman2015lower}. Сводная таблица известных верхних оценок для выпуклого случая приведена в приложении~\ref{app:literature}.
+
+\paragraph{Сравнение с известными результатами.} Известные оценки для выпуклого детерминированного случая, не использующие оценку начальной невязки, содержат либо член $(L_1R)^2$ или выше, либо множитель, равный логарифму отношения начальной невязки $f(x^0)-f^\ast$ к $\varepsilon$ или к $L_0/L_1^2$ (таблица~\ref{tab:lit-convex}). На классе, заданном только радиусом, этот множитель может иметь порядок $L_1R$. Например, при $L_1R\ge1$ для прохождения режима больших градиентов, то есть для достижения невязки $L_0/(128L_1^2)$, известные оценки дают $O((L_1R)^{5/3})$ итераций с точной одномерной минимизацией для метода AGMsDR \citep{vankov2025optimizing} и $O((L_1R)^2)$ итераций для предварительного этапа метода из работы \citet{tyurin2026accelerated}. Наш первый этап проходит этот режим за $O\bigl((1+L_1R)\log(2+L_1R)\bigr)$ обращений к оракулу при неизвестной начальной невязке. После этого ускоренный метод из работы \citet[теорема~3.2]{tyurin2026accelerated} даёт оценку $O\bigl(1+\sqrt{L_0R^2/\varepsilon}\bigr)$ без логарифмов, и мы используем его на втором этапе. Нижние оценки в обобщённой постановке ранее были известны лишь для конкретных методов, например для градиентного спуска с постоянным шагом \citep{zhang2019gradient,crawshaw2022robustness}, вариантов AdaGrad \citep{crawshaw2025lower} и методов без знания параметров \citep{hubler2024parameter}, или переносились из подкласса $L_1=0$ \citep{nesterov2018lectures}. Насколько нам известно, теоремы~\ref{thm:lower-radius} и~\ref{thm:lower-gap} --- первые нижние оценки для произвольных детерминированных методов, в которых участвует $L_1$.
+
+\paragraph{Организация.} В разделе~\ref{sec:setting} заданы класс функций и оракульная сложность. В разделе~\ref{sec:upper} построен метод, дающий верхнюю оценку. В разделе~\ref{sec:lower} доказана нижняя оценка, совпадающая с верхней асимптотически с точностью до логарифмических множителей. Раздел~\ref{sec:conclusion} перечисляет открытые вопросы. Приложение~\ref{app:tools} содержит общие неравенства для функций класса, описанного выше, и доказательства вспомогательных лемм. В приложения вынесены также класс с ограниченной начальной невязкой (приложение~\ref{app:gap}), фиксированная размерность (приложение~\ref{app:fixed-dim}) и сводная таблица известных оценок (приложение~\ref{app:literature}).
+
+\begin{table}[ht]
+\centering\small
+\caption{Результаты, полученные в нашей работе. Столбец <<Условие>> задаёт дополнительное ограничение на начальную невязку в определении класса.}
+\label{tab:results}
+\begin{tabularx}{\linewidth}{@{}P{.2\linewidth}lccY@{}}
+\toprule
+Результат & Условие & Ниж. & Верх. & Сложность $1+N$\\
+\midrule
+Теоремы~\ref{thm:upper}, \ref{thm:lower-radius} & нет & \yes & \yes & $\widetilde\Theta\Bigl(1+\sqrt{\dfrac{L_0R^2}\varepsilon}+L_1R\Bigr)$\\[3mm]
+Теоремы~\ref{thm:upper-gap}(а), \ref{thm:lower-gap} & $f(x^0)-f^\ast\le4\varepsilon$ & \yes & \yes & $\widetilde\Theta\Bigl(1+\sqrt{\dfrac{L_0R^2}\varepsilon}+(L_1R)^{2/3}\Bigr)$\\[3mm]
+Теорема~\ref{thm:upper-gap}(б) & $f(x^0)-f^\ast\le\Delta$ & \no & \yes & $O\Bigl(\log\Bigl(2+\dfrac{L_0R^2}\varepsilon+L_1R\Bigr)\,\times$\newline$\times\Bigl[1+\sqrt{\dfrac{L_0R^2}\varepsilon}+(L_1R)^{2/3}\log^{2/3}\dfrac{2\Delta}\varepsilon\Bigr]\Bigr)$\\
+\bottomrule
+\end{tabularx}
+\par\smallskip\raggedright\footnotesize
+В третьей строке предполагается $\Delta>\varepsilon$. При $\Delta\le\varepsilon$ достаточно вернуть $x^0$ без обращений к оракулу.
+\end{table}
+
+\section{Постановка задачи}\label{sec:setting}
+
+В этом разделе вводятся класс функций и оракульная сложность.
+
+\begin{definition}[класс функций]\label{def:class}
+Пусть $\ell:[0,\infty)\to(0,\infty)$ --- непрерывная неубывающая функция. Через $\F_\ell^d$ обозначается класс выпуклых дифференцируемых функций $f:\R^d\to\R$, для которых при всех $x,y\in\R^d$
+\begin{equation}\label{eq:class}
+ \norm{\nabla f(x)-\nabla f(y)}
+ \le\ell\Bigl(\sup_{u\in[x,y]}\norm{\nabla f(u)}\Bigr)\norm{x-y} .
+\end{equation}
+Для $\ell(s)=L_0+L_1s$ мы пишем $\F_{L_0,L_1}^d$ и называем функции этого класса \emph{$(L_0,L_1)$-гладкими}.
+\end{definition}
+
+Неравенство~\eqref{eq:class} --- это условие симметричной $(L_0,L_1)$-гладкости из работы \citet[предположение~1.3]{gorbunov2024methods}, записанное для произвольной функции $\ell$. Оно согласуется с определением $\ell$-гладкости в работах \citet{li2023generalized,tyurin2025unified}. При $\ell\equiv L$ получается класс выпуклых функций с $L$-липшицевым градиентом. Класс $\F_\ell^d$ инвариантен относительно ортогональных преобразований координат, сдвигов аргумента и прибавления константы.
+
+Проверять условие~\eqref{eq:class} непосредственно неудобно. Следующая лемма показывает, что его достаточно проверять вдоль прямых, а для дважды непрерывно дифференцируемых функций оно равносильно привычной оценке гессиана. Её доказательство приведено в приложении~\ref{app:tools-class}.
+
+\proofdown{lem:class}
+\begin{lemma}[характеризация класса]\label{lem:class}
+Пусть функция $f:\R^d\to\R$ выпукла и дифференцируема.
+\begin{enumerate}
+\item[(а)] $f\in\F_\ell^d$ тогда и только тогда, когда для любых $x,v\in\R^d$ отображение $t\mapsto\nabla f(x+tv)$ локально абсолютно непрерывно на $\R$ и при почти всех $t$
+\begin{equation}\label{eq:line-derivative}
+ \Bigl\|\frac{d}{dt}\nabla f(x+tv)\Bigr\|\le\ell\bigl(\norm{\nabla f(x+tv)}\bigr)\norm v .
+\end{equation}
+\item[(б)] Если $f\in C^2(\R^d)$, то $f\in\F_\ell^d$ тогда и только тогда, когда при всех $x$
+\begin{equation}\label{eq:hessian-bound}
+ 0\preceq\nabla^2f(x)\preceq\ell\bigl(\norm{\nabla f(x)}\bigr)I .
+\end{equation}
+\end{enumerate}
+\end{lemma}
+
+Сдвигом аргумента можно добиться равенства $x^0=0$, что мы и предполагаем. Рассматриваются два класса задач.
+\begin{itemize}
+\item $\mathcal P_{\rm R}$ --- все функции $f\in\F_{L_0,L_1}^d$, $d\ge1$, имеющие точку минимума $x^\ast$ с $\norm{x^\ast}\le R$ (\emph{класс, заданный только радиусом}).
+\item $\mathcal P_\Delta$ --- функции из $\mathcal P_{\rm R}$, для которых дополнительно $f(0)-f^\ast\le\Delta$ (\emph{класс с ограниченной начальной невязкой}).
+\end{itemize}
+Метод \emph{решает} класс за $N$ обращений к оракулу в размерности $d$, если на выходе $f(\hat x)-f^\ast\le\varepsilon$ для всех функций класса на $\R^d$. \emph{Оракульная сложность} $\mathcal N(\mathcal P)$ класса $\mathcal P$ --- наименьшее $N$, при котором для каждой размерности $d$ найдётся метод, решающий все задачи класса в этой размерности не более чем за $N$ обращений. Точная модель детерминированного метода нужна для нижней оценки и приведена в разделе~\ref{sec:lower}. Нас интересует прежде всего сложность $\mathcal N(\mathcal P_{\rm R})$, класс $\mathcal P_\Delta$ рассматривается в приложении~\ref{app:gap}.
+
+\section{Верхняя оценка}\label{sec:upper}
+
+В этом разделе построен метод, на котором достигается верхняя оценка сложности класса $\mathcal P_{\rm R}$. Метод состоит из двух этапов.
+\begin{itemize}
+\item \emph{Первый этап} (метод SHERPA) проходит режим больших градиентов. Начиная из точки $x^0$, он находит точку $x'$, для которой
+\begin{equation}\label{eq:stage-one-goal}
+\begin{aligned}
+ f(x')-f^\ast&\le\frac{L_0}{128L_1^2},\\
+ \norm{x'-x^\ast}&\le R .
+\end{aligned}
+\end{equation}
+Это ускоренный метод, построенный по схеме оценивающих последовательностей Нестерова \citep[§2.2]{nesterov2018lectures}, с неточным одномерным поиском.
+\item \emph{Второй этап} (метод CRUISE) запускается из точки $x'$. В окрестности такой точки функция класса ведёт себя как функция с $2L_0$-липшицевым градиентом, и работает обычный ускоренный метод с постоянным шагом $1/(2L_0)$, анализ которого мы берём из работы \citet{tyurin2026accelerated}.
+\end{itemize}
+Подразделы~\ref{sec:upper-descent}--\ref{sec:count3} посвящены первому этапу, подраздел~\ref{sec:upper-second} --- второму, в подразделе~\ref{sec:upper-proof} доказана итоговая оценка. Всюду в разделе $f\in\F_{L_0,L_1}^d$, а $x^\ast$ --- точка минимума функции $f$. Доказательства вспомогательных лемм вынесены в приложение~\ref{app:tools}.
+
+\subsection{Лемма о спуске}\label{sec:upper-descent}
+
+Первая лемма --- аналог классической леммы о спуске \citep[лемма~1.2.3]{nesterov2018lectures}. Шаг градиентного спуска делается с длиной, вычисленной по локальной константе гладкости $L_0+L_1\norm{\nabla f(y)}$.
+
+\proofdown{lem:safe-step}
+\begin{lemma}[лемма о спуске]\label{lem:safe-step}
+Для любой точки $y\in\R^d$ точка
+\[
+ y^+=y-\frac{\nabla f(y)}{4\bigl(L_0+L_1\norm{\nabla f(y)}\bigr)}
+\]
+удовлетворяет неравенствам
+\begin{gather*}
+ f(y^+)\le f(y)-\frac{5\norm{\nabla f(y)}^2}{24\bigl(L_0+L_1\norm{\nabla f(y)}\bigr)},\\
+ \norm{y^+-x^\ast}^2\le\norm{y-x^\ast}^2-\frac{\norm{\nabla f(y)}^2}{24\bigl(L_0+L_1\norm{\nabla f(y)}\bigr)^2} .
+\end{gather*}
+\end{lemma}
+
+Доказательство леммы~\ref{lem:safe-step} приведено в приложении~\ref{app:tools-descent}. Длина такого шага не больше $1/(4L_1)$. На таком расстоянии локальная константа гладкости меняется не более чем в $e^{1/4}$ раз (лемма~\ref{lem:gronwall}), поэтому функция ведёт себя как функция с липшицевым градиентом.
+
+\subsection{Неравенство в точке минимума}\label{sec:upper-anchored}
+
+При $G\ge0$ введём функцию
+\begin{equation}\label{eq:Phi}
+ \Phi(G)=\frac{L_0}{L_1^2}\Bigl[\Bigl(1+\frac{L_1G}{L_0}\Bigr)\log\Bigl(1+\frac{L_1G}{L_0}\Bigr)-\frac{L_1G}{L_0}\Bigr] .
+\end{equation}
+Она выпукла, $\Phi(0)=0$ и
+\begin{equation}\label{eq:Phi-derivatives}
+\begin{aligned}
+ &\Phi'(G)=\frac1{L_1}\log\Bigl(1+\frac{L_1G}{L_0}\Bigr),\\
+ &\Phi''(G)=\frac1{L_0+L_1G} .
+\end{aligned}
+\end{equation}
+При малых $G$ функция $\Phi(G)$ ведёт себя как $G^2/(2L_0)$, а при больших --- как $(G/L_1)\log(L_1G/L_0)$.
+
+Обычное неравенство выпуклости в точке минимума утверждает, что касательная к графику функции, проведённая в точке $y$, проходит в точке $x^\ast$ не выше значения $f^\ast$. В классе $\F_{L_0,L_1}^d$ касательная проходит ниже $f^\ast$ по крайней мере на $\Phi(\norm{\nabla f(y)})$.
+
+\proofdown{lem:anchored}
+\begin{lemma}[неравенство в точке минимума]\label{lem:anchored}
+Для любой точки $y\in\R^d$
+\[
+ f(y)+\ip{\nabla f(y)}{x^\ast-y}+\Phi\bigl(\norm{\nabla f(y)}\bigr)\le f^\ast .
+\]
+\end{lemma}
+
+Доказательство леммы~\ref{lem:anchored} приведено в приложении~\ref{app:tools-anchored}. Для дважды непрерывно дифференцируемых функций это частный случай неравенства из работы \citet[лемма~2.7]{vankov2025optimizing}. Благодаря слагаемому $\Phi(\norm{\nabla f(y)})$ методу первого этапа не нужна оценка начальной невязки по функции.
+
+\subsection{Неточный одномерный поиск}\label{sec:upper-search}
+
+Ускоренному методу на каждой итерации нужна точка $y$ на отрезке $[v,x]$, в которой одновременно $f(y)\le f(x)$ и мала величина $\ip{\nabla f(y)}{y-v}$. Точная одномерная минимизация дала бы $\ip{\nabla f(y)}{y-v}\le0$, но за конечное число обращений к оракулу она не гарантируется. Достаточно метода деления отрезка пополам с заранее известным числом шагов (алгоритм~\ref{alg:search}). Мы называем этот метод ICEPICK (Inexact Convex Edge Probing by Interval Cutting with Known Query Bound).
+
+\begin{algorithm}[ht]
+\caption{ICEPICK: неточный одномерный поиск}\label{alg:search}
+\begin{algorithmic}[1]
+\Require точки $v,x\in\R^d$, числа $r,\delta>0$, натуральное число $m$
+\State Запросить $\nabla f(v)$ и $\nabla f(x)$
+\If{$r\norm{\nabla f(v)}\le\delta$} \Comment{критерий остановки}
+ \State \Return $y=v$
+\ElsIf{$r\norm{\nabla f(x)}\le\delta$} \Comment{критерий остановки}
+ \State \Return $y=x$
+\ElsIf{$\ip{\nabla f(v)}{x-v}\ge0$}
+ \State \Return $y=v$
+\ElsIf{$\ip{\nabla f(x)}{x-v}\le0$}
+ \State \Return $y=x$
+\EndIf
+\State $t_-=0$, $t_+=1$
+\For{$j=1,\dots,m$}
+ \State $t=(t_-+t_+)/2$, запросить $\nabla f\bigl(v+t(x-v)\bigr)$
+ \If{$r\norm{\nabla f(v+t(x-v))}\le\delta$} \Comment{критерий остановки}
+  \State \Return $y=v+t(x-v)$
+ \ElsIf{$\ip{\nabla f(v+t(x-v))}{x-v}=0$}
+  \State \Return $y=v+t(x-v)$
+ \ElsIf{$\ip{\nabla f(v+t(x-v))}{x-v}<0$}
+  \State $t_-=t$
+ \Else
+  \State $t_+=t$
+ \EndIf
+\EndFor
+\State \Return $y=v+t_+(x-v)$
+\end{algorithmic}
+\end{algorithm}
+
+\proofdown{lem:search}
+\begin{lemma}[неточный одномерный поиск]\label{lem:search}
+Пусть $r,\delta>0$, точки $v$ и $x$ лежат в шаре $B(x^\ast,r)$, а натуральное число $m$ удовлетворяет условию
+\begin{equation}\label{eq:search-m}
+ 2^m\ge128\Bigl(1+\frac{L_0r^2}\delta+L_1r\Bigr)^2 .
+\end{equation}
+Тогда алгоритм~\ref{alg:search} делает не более $m+2$ обращений к оракулу в точках отрезка $[v,x]$ и возвращает точку $y\in[v,x]$, для которой выполнено одно из двух условий.
+\begin{enumerate}
+\item[(а)] Сработал критерий остановки. Тогда $f(y)-f^\ast\le\delta$.
+\item[(б)] Выполнены неравенства
+\begin{equation}\label{eq:search}
+\begin{aligned}
+ f(y)&\le f(x),\\
+ \ip{\nabla f(y)}{y-v}&\le\frac{\norm{\nabla f(y)}^2}{16\bigl(L_0+L_1\norm{\nabla f(y)}\bigr)} .
+\end{aligned}
+\end{equation}
+\end{enumerate}
+\end{lemma}
+
+Доказательство леммы~\ref{lem:search} приведено в приложении~\ref{app:tools-search}. Число шагов $m$ логарифмически зависит от $L_0r^2/\delta$ и $L_1r$. Именно отсюда возникает логарифмический множитель в верхней оценке. Алгоритм~\ref{alg:search} использует только градиенты: значения функции ему не нужны.
+
+\subsection{Метод первого этапа}\label{sec:upper-method}
+
+Метод первого этапа SHERPA (Smoothness-aware High-gradient Escape with Radius-Preserving Acceleration, алгоритм~\ref{alg:am}) устроен как ускоренный метод с оценивающими последовательностями \citep[§2.2]{nesterov2018lectures} и близок к методу AGMsDR \citep[алгоритм~1]{vankov2025optimizing}. Он поддерживает две последовательности точек: $x^k$ с убывающими значениями функции и $v^k$, по которой строится оценка функции снизу. Здесь и далее сумма первых $k$ членов последовательности обозначается соответствующей заглавной буквой: $A_k=a_1+\dots+a_k$, $A_0=0$. Коэффициент $a_k>0$ определяется уравнением
+\begin{equation}\label{eq:coef}
+ a_k^2=\frac{A_{k-1}+a_k}{7\bigl(L_0+L_1\norm{\nabla f(y^k)}\bigr)}+\frac{a_k\,\Phi\bigl(\norm{\nabla f(y^k)}\bigr)}{\norm{\nabla f(y^k)}^2} .
+\end{equation}
+Это квадратное уравнение относительно $a_k$ с единственным положительным корнем. Без последнего слагаемого оно совпадает с обычным правилом выбора коэффициентов ускоренного метода, в котором константа Липшица градиента заменена на $7(L_0+L_1\norm{\nabla f(y^k)})$. Последнее слагаемое отвечает добавке $\Phi$ из леммы~\ref{lem:anchored}. Оно увеличивает коэффициент на итерациях с большим градиентом.
+
+\begin{algorithm}[ht]
+\caption{SHERPA (первый этап): ускоренный метод с неточным одномерным поиском}\label{alg:am}
+\begin{algorithmic}[1]
+\Require начальная точка $x^0$, параметры $L_0$, $L_1$, $R$, причём $L_1R\ge1$
+\State $m=\Bigl\lceil\log_2\bigl(128(1+128L_1^2R^2+L_1R)^2\bigr)\Bigr\rceil$, $K=\lceil60L_1R\rceil$
+\State $v^0=x^0$, $A_0=0$
+\For{$k=1,\dots,K$}
+ \State $y^k$ --- результат алгоритма~\ref{alg:search} на отрезке $[v^{k-1},x^{k-1}]$ с $r=R$, $\delta=L_0/(128L_1^2)$ и $m$
+ \If{сработал критерий остановки}
+  \State \Return $y^k$
+ \EndIf
+ \State $a_k$ --- положительный корень уравнения~\eqref{eq:coef}, $A_k=A_{k-1}+a_k$
+ \State $x^k=y^k-\dfrac{\nabla f(y^k)}{4(L_0+L_1\norm{\nabla f(y^k)})}$
+ \State $v^k=v^{k-1}-a_k\nabla f(y^k)$
+\EndFor
+\State \Return $x^K$
+\end{algorithmic}
+\end{algorithm}
+
+Из уравнения~\eqref{eq:coef} и неравенства $A_{k-1}\ge0$ следуют два свойства коэффициентов:
+\begin{equation}\label{eq:coef-basic}
+\begin{aligned}
+ a_k&\le A_k,\\
+ a_k^2&\ge\frac{A_k}{7\bigl(L_0+L_1\norm{\nabla f(y^k)}\bigr)} .
+\end{aligned}
+\end{equation}
+На каждой итерации алгоритм~\ref{alg:search} делает не более $m+2$ обращений к оракулу, а точки $x^k$ и $v^k$ вычисляются без обращений. Поэтому $K$ итераций стоят не более $K(m+2)$ обращений. Значения функции методу не нужны.
+
+\subsection{Невязка и расстояние до точки минимума}\label{sec:upper-energy}
+
+Следующая лемма одновременно ограничивает невязку по функции, сумму квадратов норм градиентов с весами и расстояние от точки $v^k$ до точки минимума.
+
+\begin{lemma}\label{lem:energy}
+Пусть $\norm{x^0-x^\ast}\le R$, а итерации $1,\dots,k$ алгоритма~\ref{alg:am} прошли без срабатывания критерия остановки. Тогда
+\begin{equation}\label{eq:energy}
+ A_k\bigl(f(x^k)-f^\ast\bigr)+\frac12\sum_{i=1}^ka_i^2\norm{\nabla f(y^i)}^2+\frac12\norm{v^k-x^\ast}^2\le\frac{R^2}2 ,
+\end{equation}
+и все точки $x^i$, $v^i$, $y^i$, $i\le k$, лежат в шаре $B(x^\ast,R)$.
+\end{lemma}
+
+\begin{proof}
+Индукция по $k$. При $k=0$ неравенство~\eqref{eq:energy} совпадает с условием $\norm{x^0-x^\ast}\le R$. Пусть утверждение верно для $k-1$.
+\begin{itemize}
+\item \emph{Итерация корректна.} По предположению индукции точки $v^{k-1}$ и $x^{k-1}$ лежат в шаре $B(x^\ast,R)$. Шар выпукл, поэтому отрезок $[v^{k-1},x^{k-1}]$ и точка $y^k$ лежат в нём, и лемма~\ref{lem:search} применима. Критерий остановки не сработал, поэтому выполнены неравенства~\eqref{eq:search}. Вместе с леммой~\ref{lem:safe-step} они дают $x^k\in B(x^\ast,R)$ и
+\begin{equation}\label{eq:energy-step}
+\begin{aligned}
+ &f(y^k)\le f(x^{k-1}),\\
+ &\ip{\nabla f(y^k)}{y^k-v^{k-1}}\le\frac{\norm{\nabla f(y^k)}^2}{16\bigl(L_0+L_1\norm{\nabla f(y^k)}\bigr)},\\
+ &f(x^k)\le f(y^k)-\frac{5\norm{\nabla f(y^k)}^2}{24\bigl(L_0+L_1\norm{\nabla f(y^k)}\bigr)} .
+\end{aligned}
+\end{equation}
+\item \emph{Расстояние.} Так как $v^k=v^{k-1}-a_k\nabla f(y^k)$,
+\begin{equation}\label{eq:energy-dist}
+\begin{aligned}
+ \MoveEqLeft\frac12\norm{v^k-x^\ast}^2-\frac12\norm{v^{k-1}-x^\ast}^2\\
+ &=a_k\ip{\nabla f(y^k)}{y^k-v^{k-1}}-a_k\ip{\nabla f(y^k)}{y^k-x^\ast}+\frac12a_k^2\norm{\nabla f(y^k)}^2 .
+\end{aligned}
+\end{equation}
+Оценим первые два слагаемых справа:
+\begin{align*}
+ a_k\ip{\nabla f(y^k)}{y^k-v^{k-1}}
+ &\bypad{\le}{\eqref{eq:energy-step}}{\text{лемма~\ref{lem:anchored}}}\frac{a_k\norm{\nabla f(y^k)}^2}{16\bigl(L_0+L_1\norm{\nabla f(y^k)}\bigr)},\\
+ -a_k\ip{\nabla f(y^k)}{y^k-x^\ast}
+ &\by{\le}{\text{лемма~\ref{lem:anchored}}}-a_k\bigl(f(y^k)-f^\ast\bigr)-a_k\Phi\bigl(\norm{\nabla f(y^k)}\bigr).
+\end{align*}
+\item \emph{Невязка.} Так как $A_k=A_{k-1}+a_k$,
+\begin{align*}
+ \MoveEqLeft A_k\bigl(f(x^k)-f^\ast\bigr)-A_{k-1}\bigl(f(x^{k-1})-f^\ast\bigr)\\
+ &\by{\le}{\eqref{eq:energy-step}}A_k\bigl(f(y^k)-f^\ast\bigr)-\frac{5A_k\norm{\nabla f(y^k)}^2}{24\bigl(L_0+L_1\norm{\nabla f(y^k)}\bigr)}-A_{k-1}\bigl(f(y^k)-f^\ast\bigr)\\
+ &\bypad{=}{}{\eqref{eq:energy-step}}a_k\bigl(f(y^k)-f^\ast\bigr)-\frac{5A_k\norm{\nabla f(y^k)}^2}{24\bigl(L_0+L_1\norm{\nabla f(y^k)}\bigr)} .
+\end{align*}
+\item \emph{Сумма.} Умножив уравнение~\eqref{eq:coef} на $\norm{\nabla f(y^k)}^2$, получаем
+\[
+ a_k\Phi\bigl(\norm{\nabla f(y^k)}\bigr)=a_k^2\norm{\nabla f(y^k)}^2-\frac{A_k\norm{\nabla f(y^k)}^2}{7\bigl(L_0+L_1\norm{\nabla f(y^k)}\bigr)} .
+\]
+Сложим~\eqref{eq:energy-dist}, две оценки его слагаемых и оценку невязки, затем подставим это равенство:
+\begin{align*}
+ \MoveEqLeft\Bigl[A_k\bigl(f(x^k)-f^\ast\bigr)+\frac12\norm{v^k-x^\ast}^2\Bigr]-\Bigl[A_{k-1}\bigl(f(x^{k-1})-f^\ast\bigr)+\frac12\norm{v^{k-1}-x^\ast}^2\Bigr]\\
+ &\bypad{\le}{}{\eqref{eq:coef-basic}}\Bigl(\frac{a_k}{16}-\frac{5A_k}{24}\Bigr)\frac{\norm{\nabla f(y^k)}^2}{L_0+L_1\norm{\nabla f(y^k)}}-a_k\Phi\bigl(\norm{\nabla f(y^k)}\bigr)+\frac12a_k^2\norm{\nabla f(y^k)}^2\\
+ &\bypad{=}{}{\eqref{eq:coef-basic}}\Bigl(\frac{a_k}{16}-\frac{5A_k}{24}+\frac{A_k}7\Bigr)\frac{\norm{\nabla f(y^k)}^2}{L_0+L_1\norm{\nabla f(y^k)}}-\frac12a_k^2\norm{\nabla f(y^k)}^2\\
+ &\by{\le}{\eqref{eq:coef-basic}}-\frac{A_k\norm{\nabla f(y^k)}^2}{336\bigl(L_0+L_1\norm{\nabla f(y^k)}\bigr)}-\frac12a_k^2\norm{\nabla f(y^k)}^2\\
+ &\bypad{\le}{}{\eqref{eq:coef-basic}}-\frac12a_k^2\norm{\nabla f(y^k)}^2 .
+\end{align*}
+Прибавив это неравенство к неравенству~\eqref{eq:energy} для $k-1$, получаем~\eqref{eq:energy} для $k$. Из него следует $\norm{v^k-x^\ast}\le R$, что замыкает индукцию.\qedhere
+\end{itemize}
+\end{proof}
+
+\subsection{Число итераций первого этапа}\label{sec:count3}
+
+Начальная невязка неизвестна и может быть экспоненциально большой по $L_1R$, поэтому оценка числа итераций через неё бесполезна. Вместо неё работают две суммы, которые ограничивает лемма~\ref{lem:energy}: веса $A_K$ и сумма квадратов $a_i^2\norm{\nabla f(y^i)}^2$. Итерации с очень большим градиентом увеличивают вторую сумму, поэтому их мало. На остальных итерациях вес $A_i$ не слишком мал, и число таких итераций оценивается так же, как в ускоренном методе для функций с липшицевым градиентом.
+
+\begin{lemma}[число итераций первого этапа]\label{lem:count-anchor}
+Пусть $\norm{x^0-x^\ast}\le R$ и $L_1R\ge1$. Если $K$ итераций алгоритма~\ref{alg:am} прошли без срабатывания критерия остановки и
+\[
+ f(x^K)-f^\ast>\frac{L_0}{128L_1^2},
+\]
+то $K<60L_1R$.
+\end{lemma}
+
+\begin{proof}
+\leavevmode
+\begin{itemize}
+\item \emph{Две суммы.} По лемме~\ref{lem:energy} и условию на невязку
+\begin{equation}\label{eq:count-anchor-budget}
+\begin{aligned}
+ &L_0A_K<64L_1^2R^2,\\
+ &\sum_{i=1}^Ka_i^2\norm{\nabla f(y^i)}^2\le R^2 .
+\end{aligned}
+\end{equation}
+\item \emph{Оценки для одной итерации.} Из неравенств~\eqref{eq:coef-basic}
+\begin{equation}\label{eq:count-step}
+\begin{gathered}
+\begin{aligned}
+ \sqrt{L_0A_i}-\sqrt{L_0A_{i-1}}=\frac{\sqrt{L_0}\,a_i}{\sqrt{A_i}+\sqrt{A_{i-1}}}
+ &\by{\ge}{A_{i-1}\le A_i}\frac{\sqrt{L_0}\,a_i}{2\sqrt{A_i}}\\
+ &\bypad{\ge}{\eqref{eq:coef-basic}}{A_{i-1}\le A_i}\frac1{2\sqrt7}\sqrt{\frac{L_0}{L_0+L_1\norm{\nabla f(y^i)}}},
+\end{aligned}\\
+\begin{aligned}
+ L_0A_i=\frac{L_0A_i^2}{A_i}
+ &\by{\ge}{\eqref{eq:coef-basic}}\frac{L_0a_i^2}{A_i}\\
+ &\by{\ge}{\eqref{eq:coef-basic}}\frac{L_0}{7\bigl(L_0+L_1\norm{\nabla f(y^i)}\bigr)} .
+\end{aligned}
+\end{gathered}
+\end{equation}
+Разделим уравнение~\eqref{eq:coef} на $a_i$ и умножим на $L_1\norm{\nabla f(y^i)}$:
+\begin{equation}\label{eq:anchor-identity}
+ L_1a_i\norm{\nabla f(y^i)}
+ =\frac{L_1\Phi(\norm{\nabla f(y^i)})}{\norm{\nabla f(y^i)}}
+ +\frac{A_i}{7a_i}\cdot\frac{L_1\norm{\nabla f(y^i)}}{L_0+L_1\norm{\nabla f(y^i)}} .
+\end{equation}
+Оба слагаемых справа неотрицательны. По определению~\eqref{eq:Phi}
+\begin{equation}\label{eq:Phi-ratio}
+\begin{aligned}
+ \frac{L_1\Phi(\norm{\nabla f(y^i)})}{\norm{\nabla f(y^i)}}
+ &=\Bigl(1+\frac{L_0}{L_1\norm{\nabla f(y^i)}}\Bigr)\log\Bigl(1+\frac{L_1\norm{\nabla f(y^i)}}{L_0}\Bigr)-1\\
+ &\ge\log\Bigl(1+\frac{L_1\norm{\nabla f(y^i)}}{L_0}\Bigr)-1 .
+\end{aligned}
+\end{equation}
+Умножив~\eqref{eq:anchor-identity} на $7a_i/A_i$ и сложив с первым неравенством~\eqref{eq:count-step}, получаем
+\begin{equation}\label{eq:count-two-groups}
+\begin{aligned}
+ \MoveEqLeft2\sqrt7\Bigl(\sqrt{L_0A_i}-\sqrt{L_0A_{i-1}}\Bigr)+\Bigl(\frac{7L_1a_i^2\norm{\nabla f(y^i)}}{A_i}\Bigr)^{2/3}\\
+ &\ge\Bigl(\frac{L_0}{L_0+L_1\norm{\nabla f(y^i)}}\Bigr)^{1/2}+\Bigl(\frac{L_1\norm{\nabla f(y^i)}}{L_0+L_1\norm{\nabla f(y^i)}}\Bigr)^{2/3}\\
+ &\by{\ge}{(\mathrm a)}\frac{L_0}{L_0+L_1\norm{\nabla f(y^i)}}+\frac{L_1\norm{\nabla f(y^i)}}{L_0+L_1\norm{\nabla f(y^i)}}=1 .
+\end{aligned}
+\end{equation}
+Здесь (а) --- неравенства $t^{1/2}\ge t$ и $t^{2/3}\ge t$ при $0\le t\le1$.
+\item \emph{Итерации с большим произведением $L_1a_i\norm{\nabla f(y^i)}$.} Пусть $J$ --- множество номеров $i\le K$, для которых $L_1a_i\norm{\nabla f(y^i)}\ge\sqrt{L_1R}$. По второму неравенству~\eqref{eq:count-anchor-budget}
+\[
+ |J|\,L_1R\le\sum_{i\in J}L_1^2a_i^2\norm{\nabla f(y^i)}^2\le L_1^2R^2 ,
+\]
+то есть $|J|\le L_1R$.
+\item \emph{Остальные итерации.} Пусть $I$ --- множество остальных номеров. Если оно пусто, то $K=|J|\le L_1R$. Иначе для $i\in I$ по~\eqref{eq:anchor-identity} и~\eqref{eq:Phi-ratio}
+\[
+ \log\Bigl(1+\frac{L_1\norm{\nabla f(y^i)}}{L_0}\Bigr)-1\le L_1a_i\norm{\nabla f(y^i)}<\sqrt{L_1R} ,
+\]
+и второе неравенство~\eqref{eq:count-step} даёт
+\[
+ L_0A_i\ge\frac17\Bigl(1+\frac{L_1\norm{\nabla f(y^i)}}{L_0}\Bigr)^{-1}>\frac17e^{-\sqrt{L_1R}-1} .
+\]
+Пусть $j$ --- наименьший номер из $I$. Веса $A_i$ возрастают, поэтому при $i>j$ имеем $A_{i-1}>0$ и
+\[
+ \frac{a_i}{A_i}\le-\log\Bigl(1-\frac{a_i}{A_i}\Bigr)=\log\frac{A_i}{A_{i-1}} .
+\]
+Вместе с неравенством $a_j\le A_j$ это даёт
+\begin{align*}
+ \sum_{i\in I}\frac{a_i}{A_i}
+ &\le1+\log\frac{A_K}{A_j}
+ \by{<}{\eqref{eq:count-anchor-budget}}1+\log\bigl(448L_1^2R^2e^{\sqrt{L_1R}+1}\bigr)\\
+ &\bypad{=}{}{\eqref{eq:count-anchor-budget}}\sqrt{L_1R}+2+\log448+2\log(L_1R)\\
+ &\bypad{<}{(\mathrm б)}{\eqref{eq:count-anchor-budget}}5\sqrt{L_1R}+\frac92
+ \by{\le}{L_1R\ge1}\frac{19}2\sqrt{L_1R} .
+\end{align*}
+Здесь (б) --- неравенства $\log448<13/2$ и $\log t\le2\sqrt t-2$ при $t\ge1$.
+Сложим неравенства~\eqref{eq:count-two-groups} по $i\in I$. Первые слагаемые в сумме не больше $2\sqrt7\sqrt{L_0A_K}<16\sqrt7L_1R$. Ко вторым применим неравенство Гёльдера с показателями $3$ и $3/2$:
+\begin{align*}
+ |I|
+ &<16\sqrt7L_1R+7^{2/3}\sum_{i\in I}\bigl(L_1a_i\norm{\nabla f(y^i)}\bigr)^{2/3}\Bigl(\frac{a_i}{A_i}\Bigr)^{2/3}\\
+ &\bypad{\le}{}{\eqref{eq:count-anchor-budget}}16\sqrt7L_1R+7^{2/3}\Bigl(\sum_{i\in I}L_1^2a_i^2\norm{\nabla f(y^i)}^2\Bigr)^{1/3}\Bigl(\sum_{i\in I}\frac{a_i}{A_i}\Bigr)^{2/3}\\
+ &\by{<}{\eqref{eq:count-anchor-budget}}16\sqrt7L_1R+7^{2/3}(L_1R)^{2/3}\Bigl(\frac{19}2\sqrt{L_1R}\Bigr)^{2/3}\\
+ &\bypad{=}{}{\eqref{eq:count-anchor-budget}}\Bigl(16\sqrt7+\Bigl(\frac{133}2\Bigr)^{2/3}\Bigr)L_1R\\
+ &\bypad{<}{(\mathrm в)}{\eqref{eq:count-anchor-budget}}59L_1R .
+\end{align*}
+Здесь (в) --- неравенства $16\sqrt7<42{,}4$ и $(133/2)^{2/3}<16{,}5$, равносильные $1792<42{,}4^2$ и $133^2<4\cdot16{,}5^3$.
+\item \emph{Итог.} Каждая итерация попадает ровно в одно из множеств $J$ и $I$, поэтому
+\[
+ K=|J|+|I|<L_1R+59L_1R=60L_1R .\qedhere
+\]
+\end{itemize}
+\end{proof}
+
+\subsection{Второй этап}\label{sec:upper-second}
+
+На втором этапе работает ускоренный градиентный метод с постоянным шагом $1/(2L_0)$ \citep[алгоритм~1]{tyurin2026accelerated} (алгоритм~\ref{alg:agm}). По структуре он близок к методу подобных треугольников \citep{gasnikov2018universal}. Используемый вариант мы называем CRUISE (Constant-step Refinement Using Inertia in Smooth Environments). Это название варианта ускоренного метода из работы \citet{tyurin2026accelerated} с начальной точкой, найденной на первом этапе, а не новый метод, разработанный авторами настоящей статьи. На каждой итерации вычисляется один новый градиент.
+
+\begin{algorithm}[ht]
+\caption{CRUISE (второй этап): ускоренный метод с постоянным шагом из работы \citet{tyurin2026accelerated}}\label{alg:agm}
+\begin{algorithmic}[1]
+\Require начальная точка $x'$, параметры $L_0$, $L_1$, $R$, число итераций $N$
+\State $y^0=w^0=x'$, $\Gamma_0=L_0/(64L_1^2R^2)$
+\For{$k=0,\dots,N-1$}
+ \State $\lambda_k=\sqrt{\Gamma_k/(2L_0)}$
+ \State $y^{k+1}=\dfrac1{1+\lambda_k}\Bigl(y^k+\lambda_kw^k-\dfrac{\nabla f(y^k)}{2L_0}\Bigr)$
+ \State $w^{k+1}=w^k-\dfrac{\lambda_k}{\Gamma_k}\nabla f(y^{k+1})$
+ \State $\Gamma_{k+1}=\Gamma_k/(1+\lambda_k)$
+\EndFor
+\State \Return $y^N$
+\end{algorithmic}
+\end{algorithm}
+
+\begin{proposition}[второй этап]\label{prop:agm}
+Пусть $L_1R\ge1$, а точка $x'$ удовлетворяет условиям
+\begin{align*}
+ f(x')-f^\ast&\le\frac{L_0}{128L_1^2},\\
+ \norm{x'-x^\ast}&\le R .
+\end{align*}
+Тогда точки алгоритма~\ref{alg:agm} при всех $k\ge1$ удовлетворяют неравенству
+\[
+ f(y^k)-f^\ast\le\frac{18L_0R^2}{k^2} .
+\]
+В частности, при
+\begin{equation}\label{eq:agm-N}
+ N=\Bigl\lceil\sqrt{\frac{18L_0R^2}\varepsilon}\,\Bigr\rceil
+\end{equation}
+алгоритм находит точку с невязкой по функции не больше $\varepsilon$, сделав не более
+\[
+ 5\sqrt{\frac{L_0R^2}\varepsilon}+2
+\]
+обращений к оракулу.
+\end{proposition}
+
+\begin{proof}
+Это теорема~3.2 из работы \citet{tyurin2026accelerated} для $\ell(s)=L_0+L_1s$ с параметром точности, равным удвоенной правой части первого неравенства~\eqref{eq:stage-one-goal}. Проверим её условия.
+\begin{itemize}
+\item Автор работы \citet{tyurin2026accelerated} формулирует результат для дважды дифференцируемых функций, но отмечает (там же, после леммы~2.2), что вместо оценки гессиана достаточно неравенства
+\[
+ \norm{\nabla f(z)-\nabla f(y)}\le\bigl(L_0+L_1\norm{\nabla f(y)}\bigr)\frac{e^{L_1\norm{z-y}}-1}{L_1} .
+\]
+Для нашего класса это лемма~\ref{lem:gronwall}(б).
+\item Функция из условия теоремы~3.2 строго возрастает на $[0,\infty)$, поскольку при $t>0$
+\[
+ \frac{d}{dt}\,\frac{t^2}{2(L_0+4L_1t)}=\frac{t(L_0+2L_1t)}{(L_0+4L_1t)^2}>0 .
+\]
+\item Условие теоремы~3.2 на параметр точности выполнено с равенством:
+\[
+ \ell\Bigl(8\sqrt{\ell(0)\,\frac{L_0}{64L_1^2}}\Bigr)=L_0+8L_1\sqrt{\frac{L_0^2}{64L_1^2}}=2L_0=2\ell(0) .
+\]
+\item В теореме~3.2 начальная точка ускоренного метода получена градиентным спуском, но в доказательстве (там же, приложение~E.1, формула~(32)) используются только два её свойства~\eqref{eq:stage-one-goal}. Для точки $x'$ они выполнены по условию.
+\item Число предварительных итераций в теореме~3.2 равно нулю:
+\[
+ \frac{\Gamma_0}{8L_0}=\frac1{512L_1^2R^2}\le\frac49 ,
+\]
+поэтому
+\[
+ \max\Bigl\{1+\frac12\log_{3/2}\frac{\Gamma_0}{8L_0},\ 0\Bigr\}=0 .
+\]
+\end{itemize}
+Теорема~3.2 даёт оценку из формулировки предложения. При $N$ из~\eqref{eq:agm-N} её правая часть для $k=N$ не больше $\varepsilon$. Алгоритм вычисляет градиенты в точках $y^0,\dots,y^N$, поэтому число $N+1$ его обращений к оракулу удовлетворяет неравенству
+\[
+ N+1\le\sqrt{\frac{18L_0R^2}\varepsilon}+2\le5\sqrt{\frac{L_0R^2}\varepsilon}+2 .
+\]
+\end{proof}
+
+\subsection{Итоговая оценка}\label{sec:upper-proof}
+
+\begin{theorem}[верхняя оценка для класса, заданного только радиусом]\label{thm:upper}
+Для любых $L_0,L_1,R,\varepsilon>0$
+\[
+ \mathcal N(\mathcal P_{\rm R})\le5\sqrt{\frac{L_0R^2}\varepsilon}+240\,(1+L_1R)\log_2\bigl(64(1+L_1R)\bigr)+2 .
+\]
+Метод, на котором достигается эта оценка, использует только градиенты и числа $L_0$, $L_1$, $R$, $\varepsilon$. Значение $f^\ast$, оценка начальной невязки и значения функции ему не нужны.
+\end{theorem}
+
+\begin{proof}
+\leavevmode
+\begin{itemize}
+\item \emph{Сведение к случаю $L_1R\ge1$.} Если $L_1R<1$, то класс $\F_{L_0,L_1}^d$ содержится в классе $\F_{L_0,1/R}^d$. Тогда во всех параметрах обоих этапов заменим $L_1$ на $1/R$. После замены $K=60$ и $m=22$, поэтому первый этап делает не больше $60\cdot24=240\log_264$ обращений к оракулу, что не превосходит $240(1+L_1R)\log_2\bigl(64(1+L_1R)\bigr)$. Далее $L_1R\ge1$.
+\item \emph{Первый этап.} Запустим алгоритм~\ref{alg:am}. Число $m$ в нём удовлетворяет условию~\eqref{eq:search-m} с $r=R$ и $\delta=L_0/(128L_1^2)$. Пусть $x'$ --- возвращённая точка. Докажем, что для неё выполнены неравенства~\eqref{eq:stage-one-goal}. Если на итерации $k$ сработал критерий остановки, то первое из них даёт лемма~\ref{lem:search}. Кроме того, $x'$ лежит на отрезке $[v^{k-1},x^{k-1}]$, концы которого по лемме~\ref{lem:energy} лежат в шаре $B(x^\ast,R)$. Иначе выполнены все $K\ge60L_1R$ итераций, и первое неравенство даёт лемма~\ref{lem:count-anchor}, а второе --- лемма~\ref{lem:energy}.
+\item \emph{Число обращений на первом этапе.} Оно не больше $K(m+2)$. При $L_1R\ge1$
+\begin{align*}
+ &K\le60L_1R+1\le60(1+L_1R),\\
+ &m+2\by{\le}{(\mathrm a)}\log_2\bigl(2^{21}L_1^2R^2(1+L_1R)^2\bigr)+3\le4\log_2\bigl(64(1+L_1R)\bigr) .
+\end{align*}
+Здесь (а) --- неравенство $1+128L_1^2R^2+L_1R\le128L_1R(1+L_1R)$. Значит, первый этап делает не больше $240(1+L_1R)\log_2\bigl(64(1+L_1R)\bigr)$ обращений к оракулу.
+\item \emph{Второй этап.} Если $\varepsilon$ не меньше правой части первого неравенства~\eqref{eq:stage-one-goal}, возвращаем $x'$. Иначе запускаем из $x'$ алгоритм~\ref{alg:agm} с числом итераций~\eqref{eq:agm-N}. По предложению~\ref{prop:agm} он находит точку с невязкой по функции не больше $\varepsilon$, и число его обращений к оракулу ограничено оценкой из этого предложения.
+\end{itemize}
+Складывая число обращений на двух этапах, получаем утверждение теоремы. Оба алгоритма используют только градиенты.
+\end{proof}
+
+Итак,
+\[
+ \mathcal N(\mathcal P_{\rm R})=O\Bigl(\sqrt{\frac{L_0R^2}\varepsilon}+(1+L_1R)\log(2+L_1R)\Bigr).
+\]
+Классическое слагаемое входит без логарифма и с константой~$5$, а логарифмический множитель стоит только при $L_1R$ и возникает из одномерного поиска. В разделе~\ref{sec:lower} показано, что с точностью до логарифмических множителей эта оценка неулучшаема.
+
+\section{Нижняя оценка}\label{sec:lower}
+
+\paragraph{Модель оракула.} Мы пользуемся стандартной моделью чёрного ящика с оракулом первого порядка \citep{nemirovski1983problem}, \citep[§1.1.2]{nesterov2018lectures}. На запрос $z\in\R^d$ оракул возвращает пару $(f(z),\nabla f(z))$, другой информации о функции у метода нет. \emph{Детерминированный метод}, делающий $N$ обращений к оракулу в размерности $d$, задаётся двумя правилами: $k$-я точка запроса есть произвольная функция предыдущих точек запроса и ответов оракула в них, а выход $\hat x$ --- произвольная функция всех точек запроса и ответов. Метод знает $L_0$, $L_1$, $R$, $\varepsilon$ (и оценку начальной невязки $\Delta$, если она задана), но не знает $f^\ast$ и $x^\ast$. Значения функции в ответе оракула только расширяют возможности метода, поэтому нижние оценки этого раздела тем более верны для методов, получающих лишь градиенты.
+
+Нижняя оценка означает, что для каждого детерминированного метода с меньшим числом обращений к оракулу найдётся функция класса, на выходе которой невязка по функции больше $\varepsilon$. Мы пользуемся классической схемой \citet{nemirovski1983problem} в форме, изложенной в работе \citet{carmon2020lower}. Схема состоит из двух шагов.
+\begin{itemize}
+\item \emph{Цепочка.} Строится выпуклая функция на $\R^n$, у которой каждое обращение к оракулу открывает не больше одной новой координаты. Крыловский метод после $n-1$ обращений не выходит из подпространства, где последняя координата равна нулю, а там невязка больше $\varepsilon$.
+\item \emph{Принцип ортогональной инвариантности.} Класс не меняется при ортогональных преобразованиях. Поэтому, поворачивая цепочку в пространстве размерности $2n$, оценку для крыловских методов можно перенести на произвольные детерминированные методы.
+\end{itemize}
+Оба шага --- общий инструмент, он описан в подразделе~\ref{sec:chains}. Там же построены цепочки, сопряжённые к сильно выпуклым функциям на многограннике. Конкретные цепочки различаются наклонами звеньев. В подразделе~\ref{sec:ordered} наклоны убывают в геометрической прогрессии, и цепочка содержит почти $L_1R$ звеньев. В приложении~\ref{app:gap} наклоны равны, звеньев порядка $(L_1R)^{2/3}$, зато начальная невязка мала. Классическое слагаемое, не зависящее от $L_1$, даёт нижняя оценка для функций с $L_0$-липшицевым градиентом \citep[теорема~2.1.7]{nesterov2018lectures}, мы её не передоказываем. Основной результат раздела, теорема~\ref{thm:lower-radius}, доказан в подразделе~\ref{sec:lower-radius-proof}.
+
+\subsection{Цепочки и принцип ортогональной инвариантности}\label{sec:chains}
+
+Пусть $e_1,\dots,e_n$ --- стандартный базис $\R^n$. Положим $\mathcal K_0=\{0\}$ и при $j=1,\dots,n$
+\[
+ \mathcal K_j=\operatorname{span}\{e_1,\dots,e_j\}.
+\]
+
+\begin{definition}[цепочка]\label{def:zero-chain}
+Дифференцируемая функция $\varphi:\R^n\to\R$ называется \emph{цепочкой}, если при каждом $j=1,\dots,n$
+\begin{equation}\label{eq:coord-chain}
+ y\in\mathcal K_{j-1}\implies\nabla\varphi(y)\in\mathcal K_j .
+\end{equation}
+\end{definition}
+
+Это нуль-цепочки из работы \citet{carmon2020lower}, а $\mathcal K_j$ играют роль крыловских подпространств. Метод назовём \emph{крыловским}, если каждая точка запроса и выход лежат в линейной оболочке уже полученных градиентов. Такой метод после $n-1$ обращений к цепочке не выходит из $\mathcal K_{n-1}$.
+
+\paragraph{Цепочки на многограннике.} Квадратичная цепочка не использует $L_1$. Чтобы получить слагаемое с $L_1R$, нужна цепочка, кривизна которой растёт вместе с градиентом. Мы строим её как функцию, сопряжённую к сильно выпуклой функции $H$ на многограннике: чем меньше модуль сильной выпуклости $H$, тем больше кривизна сопряжённой функции. При постоянном модуле градиент сопряжённой функции липшицев с обратной константой \citep[теорема~6.1.1]{nesterov2018lectures}. Следующая лемма разрешает модулю зависеть от точки.
+
+\begin{lemma}[гладкость сопряжённой функции]\label{lem:conj}
+Пусть $K\subset\R^n$ --- непустой выпуклый компакт, функция $H$ непрерывна на $K$, и для любых $z,z'\in K$ её сужение на отрезок $[z,z']$ сильно выпукло с модулем
+\[
+ \frac1{L_0+L_1\max\{\norm z,\norm{z'}\}} .
+\]
+Тогда при любом $\sigma\in\R^n$ функция
+\[
+ \varphi(y)=\max_{z\in K}\bigl\{\ip{y+\sigma}z-H(z)\bigr\}
+\]
+выпукла и дифференцируема, её градиент $\nabla\varphi(y)$ --- единственная точка максимума $z(y)$, и при всех $y,y'$
+\begin{equation}\label{eq:conj-lip}
+ \norm{\nabla\varphi(y)-\nabla\varphi(y')}\le\Bigl(L_0+L_1\max\bigl\{\norm{\nabla\varphi(y)},\norm{\nabla\varphi(y')}\bigr\}\Bigr)\norm{y-y'} .
+\end{equation}
+В частности, $\varphi\in\F_{L_0,L_1}^n$.
+\end{lemma}
+
+Модуль убывает с ростом норм концов отрезка. Именно поэтому кривизна $\varphi$ может расти вместе с градиентом, который лежит в $K$.
+
+\begin{proof}
+\leavevmode
+\begin{itemize}
+\item \emph{Градиент.} Обозначим $\Psi_y(z)=\ip{y+\sigma}z-H(z)$. Функция $H$ строго выпукла на каждом отрезке, поэтому $\Psi_y$ имеет на $K$ единственную точку максимума $z(y)$. По теореме Данскина функция $\varphi$ выпукла, дифференцируема и $\nabla\varphi(y)=z(y)$.
+\item \emph{Рост вокруг точки максимума.} Пусть $z=z(y)$, $z'\in K$, $z_t=z+t(z'-z)$, а $m$ --- модуль из условия для отрезка $[z,z']$. По условию функция $\Psi_y(z_t)$ остаётся вогнутой по $t$ после прибавления квадратичного слагаемого с модулем $m$, поэтому
+\begin{align*}
+ \Psi_y(z)
+ &\by{\ge}{z=z(y)}\Psi_y(z_t)\\
+ &\bypad{\ge}{(\mathrm a)}{z=z(y)}(1-t)\Psi_y(z)+t\Psi_y(z')+\frac m2t(1-t)\norm{z'-z}^2 ,
+\end{align*}
+где (а) --- сильная вогнутость $\Psi_y$ на отрезке $[z,z']$ с модулем $m$.
+Вычитая $(1-t)\Psi_y(z)$, деля на $t$ и устремляя $t$ к нулю, получаем
+\begin{equation}\label{eq:conj-growth}
+ \Psi_y(z(y))-\Psi_y(z')\ge\frac m2\norm{z'-z(y)}^2 .
+\end{equation}
+\item \emph{Липшицевость градиента.} Пусть $z=z(y)$, $z'=z(y')$, а $m$ --- модуль для отрезка $[z,z']$. Сложим \eqref{eq:conj-growth} для пары $(y,z')$ с тем же неравенством для пары $(y',z)$. Значения $H$ сокращаются, и
+\begin{align*}
+ m\norm{z-z'}^2&\bypad{\le}{}{\text{КБШ}}\ip{y-y'}{z-z'}\\
+ &\by{\le}{\text{КБШ}}\norm{y-y'}\,\norm{z-z'} .
+\end{align*}
+При $z=z'$ неравенство~\eqref{eq:conj-lip} очевидно, иначе деление на $m\norm{z-z'}$ даёт~\eqref{eq:conj-lip}. Максимум нормы градиента по концам отрезка не больше его супремума по отрезку, поэтому $\varphi\in\F_{L_0,L_1}^n$.\qedhere
+\end{itemize}
+\end{proof}
+
+\paragraph{Принцип ортогональной инвариантности.} Ограничение на метод снимается поворотом цепочки: класс не меняется при ортогональных преобразованиях.
+
+\begin{proposition}[принцип ортогональной инвариантности]\label{prop:reduction}
+\leavevmode
+\begin{enumerate}
+\item[(а)] Пусть $\varphi:\R^n\to\R$ --- выпуклая цепочка, $d\ge2n$, и каждой матрице $V$ размера $d\times n$ с ортонормированными столбцами $v_1,\dots,v_n$ сопоставлена функция
+\[
+ F_V(x)=\varphi(V^\top x) .
+\]
+Пусть каждая функция $F_V$ достигает минимума и при некотором $\mathrm{gap}>0$
+\begin{equation}\label{eq:hidden-gap}
+ \ip{v_n}x=0\implies F_V(x)-\min F_V\ge\mathrm{gap}.
+\end{equation}
+Тогда для любого детерминированного метода с $n-1$ обращениями к оракулу в $\R^d$ найдётся $V$, для которого $F_V(\hat x)-\min F_V\ge\mathrm{gap}$.
+\item[(б)] Пусть цепочка $\varphi\in\F_{L_0,L_1}^n$ имеет точку минимума нормы не больше $R$ и при $y_n=0$
+\[
+ \varphi(y)-\min\varphi\ge\mathrm{gap}>\varepsilon .
+\]
+Тогда $\mathcal N(\mathcal P_{\rm R})\ge n$. Если, кроме того, $\varphi(0)-\min\varphi\le\Delta$, то $\mathcal N(\mathcal P_\Delta)\ge n$.
+\end{enumerate}
+\end{proposition}
+
+Пункт~(а) --- принцип ортогональной инвариантности в форме \citet[§3.3]{carmon2020lower}. Векторы $v_k$ выбираются по ходу работы метода ортогонально уже сделанным запросам, поэтому ответы оракула, включая значения функции, не зависят от ещё не выбранных векторов. Квадратичная цепочка для методов, точки которых лежат в линейной оболочке градиентов, разобрана, например, в \citet[упражнение~1.3]{gasnikov2021modern}. Переход к произвольным детерминированным методам восходит к \citet{nemirovski1983problem}. Пункт~(б) следует из~(а) при $d=2n$.
+
+\subsection{Цепочка с геометрически убывающими наклонами}\label{sec:ordered}
+
+Звенья этой цепочки --- аффинные функции координат с наклонами $G_i$, убывающими в геометрической прогрессии. Благодаря этому сдвиги звеньев почти одинаковы, и в шар радиуса $R$ помещается почти $L_1R$ звеньев: теряется лишь множитель $\sqrt{\log(L_1R)}$. Новыми здесь являются выбор функции $H$, модуль сильной выпуклости которой убывает ровно так, как требует условие $(L_0,L_1)$-гладкости, и выбор наклонов и сдвигов.
+
+\paragraph{Наклоны и сдвиги.} Зафиксируем $n\ge1$ и при $i=1,\dots,n$ положим
+\begin{equation}\label{eq:slopes}
+\begin{aligned}
+ G_i&=\varepsilon L_1\exp\Bigl((n-i)\sqrt{\frac{\log(4n)}n}\Bigr),\\
+ \sigma_i&=\frac2{L_1}\log\Bigl(1+\frac{L_1G_1}{L_0}\Bigr)+\frac2{L_1}+\frac{4\log(1+\sqrt n)}{L_1G_i}\sum_{k=i}^nG_k .
+\end{aligned}
+\end{equation}
+Наклоны убывают от $G_1$ до $G_n=\varepsilon L_1$. Из определения сдвигов при $j<l$
+\begin{equation}\label{eq:shift-gap}
+\begin{aligned}
+ G_j\sigma_j-G_l\sigma_l
+ &=(G_j-G_l)\Bigl[\frac2{L_1}\log\Bigl(1+\frac{L_1G_1}{L_0}\Bigr)+\frac2{L_1}\Bigr]+\frac{4\log(1+\sqrt n)}{L_1}\sum_{k=j}^{l-1}G_k\\
+ &\ge(G_j-G_l)\,\frac2{L_1}\log\Bigl(1+\frac{L_1G_1}{L_0}\Bigr)+\frac{4\log(1+\sqrt n)}{L_1}\,G_j .
+\end{aligned}
+\end{equation}
+
+\paragraph{Функция на многограннике.} Определим многогранник
+\[
+ K=\Bigl\{z\in\R^n:\ z\ge0,\ \sum_{i=1}^n\frac{z_i}{G_i}\le1\Bigr\}
+\]
+и при $p\ge0$ функцию
+\[
+ r(p)=\frac4{L_1}\Bigl[\Bigl(p+\frac1{\sqrt n}\Bigr)\log\bigl(1+\sqrt n\,p\bigr)-p\Bigr].
+\]
+Её производные равны
+\begin{equation}\label{eq:r-derivatives}
+\begin{aligned}
+ &r'(p)=\frac4{L_1}\log\bigl(1+\sqrt n\,p\bigr),\\
+ &r''(p)=\frac{4\sqrt n}{L_1\bigl(1+\sqrt n\,p\bigr)},
+\end{aligned}
+\end{equation}
+так что $r(0)=r'(0)=0$. Для точки $z\in K$ обозначим $Z_n=z_1+\dots+z_n$ и положим
+\[
+ H(z)=\begin{cases}
+ 2\Phi(Z_n)+Z_n\displaystyle\sum_{i=1}^nr\Bigl(\frac{z_i}{Z_n}\Bigr), & Z_n>0,\\[2pt]
+ 0, & z=0,
+ \end{cases}
+\]
+где $\Phi$ --- функция~\eqref{eq:Phi} из раздела~\ref{sec:upper}. Наконец, положим
+\begin{equation}\label{eq:ordered}
+ \varphi(y)=\max_{z\in K}\bigl\{\ip{y+\sigma}z-H(z)\bigr\}.
+\end{equation}
+
+В вершине $G_ie_i$ многогранника выражение под максимумом равно $G_i(y_i+\sigma_i)-H(G_ie_i)$, то есть $i$-е звено --- аффинная функция с наклоном $G_i$.
+
+Первое слагаемое $H$ зависит только от суммы координат $z$ и отвечает за рост кривизны вместе с градиентом. Второе слагаемое отвечает за распределение этой суммы по координатам. Производная $r$ в нуле конечна, поэтому далёкие звенья не включаются вовсе.
+
+\begin{lemma}[принадлежность классу]\label{lem:ord-class}
+Функция $H$ удовлетворяет условию леммы~\ref{lem:conj}. Следовательно, $\varphi\in\F_{L_0,L_1}^n$ и её градиент удовлетворяет неравенству~\eqref{eq:conj-lip}.
+\end{lemma}
+
+\begin{proof}
+\leavevmode
+\begin{itemize}
+\item \emph{Непрерывность.} Функция $r$ выпукла и $r(0)=0$, поэтому на $[0,1]$
+\[
+ 0\le r(p)\le p\,r'(p)\le p\,r'(1) .
+\]
+Значит, второе слагаемое $H$ не больше $Z_nr'(1)$ и стремится к нулю вместе с $Z_n$. В остальных точках $K$ непрерывность очевидна.
+\item \emph{Вторая производная вдоль отрезка.} Пусть $z,z'\in K$ различны, $u=z'-z$ и $w=z+tu$, $t\in[0,1]$. Обозначим $W_n=w_1+\dots+w_n$ и $U_n=u_1+\dots+u_n$, так что $W_n$ зависит от $t$ и его производная по $t$ равна $U_n$. Положим
+\[
+ p=\frac w{W_n} .
+\]
+Координаты, равные нулю в обеих точках, равны нулю на всём отрезке, остальные положительны при $0<t<1$. Поэтому на $(0,1)$ функция $t\mapsto H(w)$ дважды непрерывно дифференцируема. Второе слагаемое $H$ --- перспектива функции $r(p_1)+\dots+r(p_n)$. Вдоль отрезка
+\begin{align*}
+ \frac{dp}{dt}&=\frac{u-pU_n}{W_n},\\
+ \Phi''(W_n)&\by{=}{\eqref{eq:Phi-derivatives}}\frac1{L_0+L_1W_n},
+\end{align*}
+и дифференцирование даёт
+\begin{equation}\label{eq:H-second}
+ \frac{d^2}{dt^2}H(w)=\frac{2U_n^2}{L_0+L_1W_n}+\sum_{i=1}^n\frac{r''(p_i)}{W_n}\,(u_i-p_iU_n)^2 .
+\end{equation}
+Вектор $p$ лежит в симплексе, поэтому каждая его координата не больше его нормы и
+\begin{equation}\label{eq:simplex-p}
+ \frac1{\sqrt n}\le\norm p\le1 .
+\end{equation}
+Кроме того, $\norm w=W_n\norm p$. Оценим коэффициенты в~\eqref{eq:H-second}:
+\begin{align*}
+ \frac{r''(p_i)}{W_n}
+ &\by{=}{\eqref{eq:r-derivatives}}\frac{4\sqrt n}{L_1W_n\,(1+\sqrt n\,p_i)}
+ \by{\ge}{\eqref{eq:simplex-p}}\frac2{L_1W_n\norm p}\\
+ &\bypad{=}{}{\eqref{eq:r-derivatives}}\frac2{L_1\norm w}
+ \ge\frac2{L_0+L_1\norm w},\\
+ \frac2{L_0+L_1W_n}
+ &\by{\ge}{\norm p\le1}\frac{2\norm p^2}{L_0+L_1W_n\norm p}
+ =\frac{2\norm p^2}{L_0+L_1\norm w} .
+\end{align*}
+Подставляя их в~\eqref{eq:H-second}, получаем
+\begin{align*}
+ \frac{d^2}{dt^2}H(w)
+ &\ge\frac2{L_0+L_1\norm w}\Bigl(\norm p^2U_n^2+\norm{u-pU_n}^2\Bigr)\\
+ &\by{\ge}{(\mathrm a)}\frac{\norm u^2}{L_0+L_1\norm w}
+ \by{\ge}{(\mathrm б)}\frac{\norm u^2}{L_0+L_1\max\{\norm z,\norm{z'}\}} .
+\end{align*}
+Здесь (а) --- неравенство $\norm{u}^2\le2\norm{pU_n}^2+2\norm{u-pU_n}^2$, (б) --- выпуклость нормы.
+\item \emph{Вывод.} Сужение $H$ на отрезок минус квадратичное слагаемое из леммы~\ref{lem:conj} имеет на $(0,1)$ неотрицательную вторую производную и непрерывно на $[0,1]$. Значит, оно выпукло, и лемма~\ref{lem:conj} применима.\qedhere
+\end{itemize}
+\end{proof}
+
+Вторая производная слагаемого $2\Phi(Z_n)$ даёт множитель $L_0+L_1\norm z$ в модуле сильной выпуклости и, следовательно, рост кривизны $\varphi$ вместе с градиентом. Множитель $\sqrt n$ в функции $r$ согласует второе слагаемое с первым и определяет величину
+\[
+ r'(1)=\frac4{L_1}\log\bigl(1+\sqrt n\bigr),
+\]
+от которой зависит длина цепочки.
+
+\begin{lemma}[цепочка]\label{lem:ord-local}
+Функция $\varphi$ --- цепочка: если $y\in\mathcal K_{j-1}$, то $\nabla\varphi(y)\in\mathcal K_j$.
+\end{lemma}
+
+\begin{proof}
+Пусть $y\in\mathcal K_{j-1}$, то есть $y_i=0$ при $i\ge j$, и $z=\nabla\varphi(y)$. Нужно доказать, что $z_l=0$ при $l>j$. Если $z=0$, доказывать нечего. Иначе $Z_n>0$. Пусть $p$ --- вектор $z$, делённый на $Z_n$.
+\begin{itemize}
+\item \emph{Условия оптимальности.} В окрестности $z$ функция $H$ дифференцируема и $\partial_iH(z)=\nu+r'(p_i)$, где
+\[
+ \nu=2\Phi'(Z_n)+\sum_{k=1}^n\bigl[r(p_k)-p_kr'(p_k)\bigr].
+\]
+Точка $z$ максимизирует вогнутую функцию на многограннике $K$. По теореме Каруша--Куна--Таккера найдётся множитель $\lambda\ge0$ линейного ограничения, задающего $K$, для которого
+\begin{equation}\label{eq:ord-kkt}
+ y_i+\sigma_i-\frac\lambda{G_i}\ \begin{cases}=\nu+r'(p_i), & z_i>0,\\ \le\nu, & z_i=0.\end{cases}
+\end{equation}
+\item \emph{Оценка сверху для $\nu$.} Так как $r(p)\le p\,r'(p)$, имеем $\nu\le2\Phi'(Z_n)$. Далее, $Z_n\le G_1$, поскольку $z\in K$ и все наклоны не больше $G_1$. Функция $\Phi'$ возрастает, поэтому
+\begin{equation}\label{eq:ord-nu-upper}
+ \nu\le2\Phi'(G_1)\by{=}{\eqref{eq:Phi-derivatives}}\frac2{L_1}\log\Bigl(1+\frac{L_1G_1}{L_0}\Bigr).
+\end{equation}
+\item \emph{Оценка снизу для $\nu$.} Так как $0\le r'(p_j)\le r'(1)$ и $y_j=0$, из~\eqref{eq:ord-kkt} в обоих случаях
+\begin{equation}\label{eq:ord-nu-lower}
+ -\lambda\le G_j\nu-G_j\sigma_j+G_jr'(1) .
+\end{equation}
+\item \emph{Координата $l$ равна нулю.} Так как $y_l=0$ и $G_j\ge G_l$,
+\begin{align*}
+ G_l\Bigl(\sigma_l-\frac\lambda{G_l}-\nu\Bigr)
+ &\bypad{\le}{\eqref{eq:ord-nu-lower}}{\eqref{eq:ord-nu-upper}}G_l\sigma_l-G_j\sigma_j+G_jr'(1)+(G_j-G_l)\nu\\
+ &\by{\le}{\eqref{eq:ord-nu-upper}}G_l\sigma_l-G_j\sigma_j+G_jr'(1)+(G_j-G_l)\,\frac2{L_1}\log\Bigl(1+\frac{L_1G_1}{L_0}\Bigr)\\
+ &\bypad{\le}{\eqref{eq:shift-gap}}{\eqref{eq:ord-nu-upper}}0 .
+\end{align*}
+Если бы $z_l>0$, то по~\eqref{eq:ord-kkt} левая часть равнялась бы $G_lr'(p_l)>0$. Значит, $z_l=0$.\qedhere
+\end{itemize}
+\end{proof}
+
+\begin{lemma}\label{lem:ord-gap}
+\leavevmode
+\begin{enumerate}
+\item[(а)] $\min\varphi=0$, и минимум достигается в точке $-\sigma$.
+\item[(б)] Если $y_n=0$, то $\varphi(y)\ge2\varepsilon$.
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+\leavevmode
+\begin{itemize}
+\item \emph{Утверждение~(а).} Точка $z=0$ допустима, поэтому $\varphi\ge-H(0)=0$. С другой стороны, $H\ge0$, и $\varphi(-\sigma)=\max_K\{-H\}=0$.
+\item \emph{Утверждение~(б).} Подставим в~\eqref{eq:ordered} вершину $G_ne_n$. Функция $\Phi$ выпукла, $\Phi(0)=0$ и $\Phi'$ возрастает, поэтому $\Phi(G_n)\le G_n\Phi'(G_n)\le G_n\Phi'(G_1)$. Кроме того, $r(1)\le r'(1)$. Значит,
+\begin{align*}
+ \varphi(y)
+ &\ge G_n\sigma_n-2\Phi(G_n)-G_nr(1)\\
+ &\ge G_n\sigma_n-\frac{2G_n}{L_1}\log\Bigl(1+\frac{L_1G_1}{L_0}\Bigr)-G_n\,\frac4{L_1}\log\bigl(1+\sqrt n\bigr)
+ \by{=}{\eqref{eq:slopes}}\frac{2G_n}{L_1}=2\varepsilon .\qedhere
+\end{align*}
+\end{itemize}
+\end{proof}
+
+\begin{lemma}[расстояние до точки минимума]\label{lem:ord-radius}
+\[
+ L_1\norm\sigma\le2\sqrt n\,\log\Bigl(1+\frac{L_1^2\varepsilon}{L_0}\Bigr)+9\,n\sqrt{\log(4n)} .
+\]
+\end{lemma}
+
+\begin{proof}
+Оценим три величины, из которых складываются сдвиги $\sigma_i$:
+\begin{align*}
+ &2\log\Bigl(1+\frac{L_1G_1}{L_0}\Bigr)\by{\le}{(\mathrm a)}2\log\Bigl(1+\frac{L_1^2\varepsilon}{L_0}\Bigr)+2\sqrt{n\log(4n)},\\
+ &4\log\bigl(1+\sqrt n\bigr)\by{\le}{(\mathrm b)}2\log(4n),\\
+ &\sum_{k=i}^n\frac{G_k}{G_i}\by{\le}{(\mathrm c)}1+\sqrt{\frac n{\log(4n)}} .
+\end{align*}
+Здесь (a) --- неравенство $\log(1+xe^v)\le\log(1+x)+v$ при $x,v\ge0$, (b) --- неравенство $(1+\sqrt n)^2\le4n$, (c) --- сумма геометрической прогрессии и неравенство $e^{-x}(1+x)\le1$. Складывая, получаем для каждой координаты
+\[
+ L_1\sigma_i\le2\log\Bigl(1+\frac{L_1^2\varepsilon}{L_0}\Bigr)+4\sqrt{n\log(4n)}+2\log(4n)+2 .
+\]
+Все $\sigma_i$ положительны, поэтому $\norm\sigma\le\sqrt n\max_i\sigma_i$ и
+\[
+ L_1\norm\sigma\le2\sqrt n\log\Bigl(1+\frac{L_1^2\varepsilon}{L_0}\Bigr)+n\sqrt{\log(4n)}\,\Bigl[4+2\sqrt{\frac{\log(4n)}n}+\frac2{\sqrt{n\log(4n)}}\Bigr].
+\]
+Отношение $\log(4n)$ к $n$ убывает и потому не больше $\log4<2$, а $n\log(4n)\ge\log4>1$. Значит, скобка меньше $4+2\sqrt2+2<9$.
+\end{proof}
+
+\begin{theorem}[нижняя оценка для цепочки с убывающими наклонами]\label{thm:ordered}
+Пусть натуральное число $n$ удовлетворяет условию
+\begin{equation}\label{eq:ordered-condition}
+ 2\sqrt n\,\log\Bigl(1+\frac{L_1^2\varepsilon}{L_0}\Bigr)+9\,n\sqrt{\log(4n)}\le L_1R .
+\end{equation}
+Тогда для каждого детерминированного метода с $n-1$ обращениями к оракулу в $\R^{2n}$ найдётся функция $f\in\mathcal P_{\rm R}$ на $\R^{2n}$ с $\min f=0$ и $f(\hat x)\ge2\varepsilon$. В частности, $\mathcal N(\mathcal P_{\rm R})\ge n$.
+\end{theorem}
+
+\begin{proof}
+Функция $\varphi$ --- выпуклая цепочка из класса $\F_{L_0,L_1}^n$ (леммы~\ref{lem:ord-class} и~\ref{lem:ord-local}). Её минимум равен нулю и достигается в точке $-\sigma$, а при $y_n=0$ её значение не меньше $2\varepsilon$ (лемма~\ref{lem:ord-gap}). Из леммы~\ref{lem:ord-radius} и условия~\eqref{eq:ordered-condition} следует, что норма $\sigma$ не больше $R$. Остаётся применить предложение~\ref{prop:reduction}(б) с $\mathrm{gap}=2\varepsilon$.
+\end{proof}
+
+Начальная невязка этих функций не ограничена величиной $4\varepsilon$. Подстановка вершины $G_1e_1$ в~\eqref{eq:ordered}, как в доказательстве леммы~\ref{lem:ord-gap}(б), даёт
+\[
+ \varphi(0)\ge\frac{2G_1}{L_1}=2\varepsilon\exp\Bigl((n-1)\sqrt{\frac{\log(4n)}n}\Bigr),
+\]
+то есть невязка экспоненциально велика по $\sqrt{n\log n}$. Поэтому теорема~\ref{thm:ordered} не противоречит верхней оценке со слагаемым $(L_1R)^{2/3}$ на классе $\mathcal P_{4\varepsilon}$ (приложение~\ref{app:gap}).
+
+\subsection{Основная нижняя оценка}\label{sec:lower-radius-proof}
+
+Осталось выбрать длину цепочки, удовлетворяющую условию \eqref{eq:ordered-condition}.
+
+\begin{lemma}[выбор длины цепочки]\label{lem:choice}
+Если $L_0R^2\ge\varepsilon$ и $L_1R\ge16$, то
+\[
+ 1+\mathcal N(\mathcal P_{\rm R})\ge\frac{L_1R}{24\sqrt{\log(2+L_1R)}} .
+\]
+\end{lemma}
+
+\begin{proof}
+Положим
+\[
+ n=\Bigl\lfloor\frac{L_1R}{24\sqrt{\log(2+L_1R)}}\Bigr\rfloor .
+\]
+Если $n=0$, утверждение очевидно. Пусть $n\ge1$. Проверим условие \eqref{eq:ordered-condition}, оценив два его слагаемых.
+\begin{itemize}
+\item \emph{Второе слагаемое.} Число $4n$ меньше $2+L_1R$, поэтому $\log(4n)\le\log(2+L_1R)$ и
+\[
+ 9n\sqrt{\log(4n)}\le9n\sqrt{\log(2+L_1R)}\by{\le}{\text{опр. }n}\frac38L_1R .
+\]
+\item \emph{Первое слагаемое.} Отношение $\log^{3/2}(2+x)$ к $x$ убывает при $x\ge16$ и в точке $16$ меньше трёх восьмых. Поэтому
+\begin{align*}
+ 2\sqrt n\log\Bigl(1+\frac{L_1^2\varepsilon}{L_0}\Bigr)
+ &\by{\le}{L_0R^2\ge\varepsilon}2\sqrt n\log\bigl(1+(L_1R)^2\bigr)
+ \by{\le}{1+t^2\le(2+t)^2}4\sqrt n\log(2+L_1R)\\
+ &\by{\le}{\text{опр. }n}\frac4{\sqrt{24}}\,L_1R\,\sqrt{\frac{\log^{3/2}(2+L_1R)}{L_1R}}\\
+ &\by{<}{L_1R\ge16}\frac4{\sqrt{24}}\sqrt{\frac38}\,L_1R=\frac{L_1R}2 .
+\end{align*}
+\end{itemize}
+Сумма слагаемых меньше $L_1R$, и теорема~\ref{thm:ordered} даёт
+\[
+ 1+\mathcal N(\mathcal P_{\rm R})\ge1+n\ge\frac{L_1R}{24\sqrt{\log(2+L_1R)}} .\qedhere
+\]
+\end{proof}
+
+\begin{theorem}[нижняя оценка для класса, заданного только радиусом]\label{thm:lower-radius}
+Если $L_0R^2\ge\varepsilon$, то
+\begin{equation}\label{eq:lower-radius}
+ 1+\mathcal N(\mathcal P_{\rm R})\ge\frac1{29}\Bigl[1+\sqrt{\frac{L_0R^2}\varepsilon}+\frac{L_1R}{\sqrt{\log(2+L_1R)}}\Bigr].
+\end{equation}
+\end{theorem}
+
+\begin{proof}
+Оценим каждое из трёх слагаемых в скобке через $1+\mathcal N(\mathcal P_{\rm R})$.
+\begin{itemize}
+\item \emph{Первое.} Очевидно, $1\le1+\mathcal N(\mathcal P_{\rm R})$.
+\item \emph{Второе.} Функции с $L_0$-липшицевым градиентом лежат в классе. Классическая оценка \citep[теорема~2.1.7]{nesterov2018lectures} вместе с предложением~\ref{prop:reduction} даёт
+\[
+ \sqrt{\frac{L_0R^2}\varepsilon}\le4\bigl(1+\mathcal N(\mathcal P_{\rm R})\bigr).
+\]
+\item \emph{Третье.} При $L_1R\ge16$ по лемме~\ref{lem:choice} оно не больше $24(1+\mathcal N(\mathcal P_{\rm R}))$. При $L_1R<16$ оно меньше $10$, поскольку возрастает по $L_1R$ и
+\[
+ \frac{16}{\sqrt{\log18}}\by{<}{\log18>4\log2}\frac{16}{\sqrt{4\log2}}\by{<}{\log2>2/3}\sqrt{96}<10 .
+\]
+\end{itemize}
+Складывая, получаем, что скобка в \eqref{eq:lower-radius} не больше $29(1+\mathcal N(\mathcal P_{\rm R}))$.
+\end{proof}
+
+Вместе с теоремой~\ref{thm:upper} при $L_0R^2\ge\varepsilon$ получаем
+\[
+ 1+\mathcal N(\mathcal P_{\rm R})=\widetilde\Theta\Bigl(1+\sqrt{\frac{L_0R^2}\varepsilon}+L_1R\Bigr).
+\]
+Степени в нижней и верхней оценках совпадают, а расхождение сводится к логарифмическим множителям при $L_1R$.
+
+\section{Заключение и открытые вопросы}\label{sec:conclusion}
+
+Большие градиенты и растущая вместе с ними кривизна создают режим, число обращений к оракулу в котором в худшем случае зависит от $L_1R$ и не зависит от $\varepsilon$. Если методу известно только расстояние $R$, то при $L_0R^2\ge\varepsilon$ оптимальная сложность среди детерминированных методов первого порядка $N$ удовлетворяет соотношению
+\[
+ 1+N=\widetilde\Theta\Bigl(1+\sqrt{\frac{L_0R^2}\varepsilon}+L_1R\Bigr).
+\]
+Иначе говоря, цена прохождения области больших градиентов равна $L_1R$ с точностью до логарифмических множителей. Если начальная невязка не больше $4\varepsilon$, эта цена падает до $(L_1R)^{2/3}$ (приложение~\ref{app:gap}). Открытыми остаются следующие вопросы.
+
+\begin{itemize}
+\item \emph{Логарифмические множители.} Между нижней и верхней оценками остаётся множитель порядка $\log^{3/2}(2+L_1R)$ при слагаемом $L_1R$. Множитель $\sqrt{\log(2+L_1R)}$ теряется в нижней оценке из-за выбора наклонов и сдвигов цепочки, множитель $\log(2+L_1R)$ --- в верхней из-за одномерного поиска на первом этапе. Мы не знаем, можно ли пройти режим больших градиентов за $O(1+L_1R)$ обращений без одномерного поиска.
+\item \emph{Известная оценка невязки.} Для класса $\mathcal P_\Delta$, у которого $\Delta$ больше $4\varepsilon$, но меньше правой части оценки~\eqref{eq:radial-gap}, доказана только верхняя оценка теоремы~\ref{thm:upper-gap}(б). Совпадающая с ней нижняя оценка по зависимости от $\Delta$ неизвестна. Точная зависимость сложности от $\Delta/\varepsilon$ при $\varepsilon<\Delta<4\varepsilon$ также не установлена.
+\item \emph{Размерность.} Нижние оценки для произвольных методов реализуются в размерности порядка числа обращений, а в фиксированной размерности при фиксированных $L_0$, $L_1$ и $\varepsilon$ сложность растёт лишь логарифмически по $R$ (приложение~\ref{app:fixed-dim}). Промежуточный режим не изучен.
+\item \emph{Рандомизированные методы и неточные градиенты.} Все нижние оценки получены для детерминированных методов и точного оракула.
+\end{itemize}
+
+\clearpage
+\bibliographystyle{plainnat}
+\bibliography{refs}
+
+\clearpage
+\appendix
+\input{sections/app_tools}
+\input{sections/app_gap}
+\input{sections/app_fixed_dim}
+\input{sections/app_literature}
+
+\end{document}

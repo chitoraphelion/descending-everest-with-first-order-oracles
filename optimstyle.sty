@@ -1,0 +1,273 @@
+% optimstyle -- restrained house style for optimization preprints.
+% Requires a standard article class. Mathematics lives in macros.tex.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{optimstyle}[2026/10/04 v1.0 Optimization paper style]
+
+% Options: russian localizes labels; independent preserves separate global
+% theorem counters; noboxes gives conventional unboxed statements.
+\newif\ifoptim@russian
+\newif\ifoptim@independent
+\newif\ifoptim@boxes \optim@boxestrue
+\DeclareOption{russian}{\optim@russiantrue}
+\DeclareOption{independent}{\optim@independenttrue}
+\DeclareOption{noboxes}{\optim@boxesfalse}
+\ProcessOptions\relax
+
+\RequirePackage{iftex}
+\ifPDFTeX
+  \RequirePackage[utf8]{inputenc}
+  \ifoptim@russian
+    \RequirePackage[T1,T2A]{fontenc}
+  \else
+    \RequirePackage[T1]{fontenc}
+    \RequirePackage{lmodern}
+  \fi
+\else
+  \RequirePackage{fontspec}
+  \ifoptim@russian
+    % CMU Serif: Computer Modern with Cyrillic. Look it up by family name, then
+    % by TeX Live file name (cm-unicode is often not registered with fontconfig).
+    \IfFontExistsTF{CMU Serif}{\setmainfont{CMU Serif}}{%
+      \IfFontExistsTF{cmunrm.otf}{%
+        \setmainfont{cmunrm.otf}[BoldFont=cmunbx.otf,ItalicFont=cmunti.otf,
+          BoldItalicFont=cmunbi.otf,SlantedFont=cmunsl.otf]}%
+        {\setmainfont{DejaVu Serif}}}
+  \else
+    \setmainfont{Latin Modern Roman}
+  \fi
+  \ifoptim@russian
+    \IfFontExistsTF{cmunss.otf}{%
+      \setsansfont{cmunss.otf}[BoldFont=cmunsx.otf,ItalicFont=cmunsi.otf]%
+      \setmonofont{cmuntt.otf}[BoldFont=cmuntb.otf,ItalicFont=cmunit.otf,Scale=MatchLowercase]}%
+      {\setsansfont{Latin Modern Sans}\setmonofont{Latin Modern Mono}[Scale=MatchLowercase]}
+  \else
+    \setsansfont{Latin Modern Sans}
+    \setmonofont{Latin Modern Mono}[Scale=MatchLowercase]
+  \fi
+\fi
+\ifoptim@russian
+  \RequirePackage[english,russian]{babel}
+  \ifPDFTeX\else\babelprovide[import,main]{russian}\fi
+\else
+  \RequirePackage[english]{babel}
+\fi
+\RequirePackage[a4paper,hmargin=27mm,top=25mm,bottom=27mm]{geometry}
+\RequirePackage{amsmath,amssymb,amsthm,mathtools}
+\RequirePackage{microtype}
+\RequirePackage{xcolor}
+\RequirePackage{graphicx,booktabs,array}
+\RequirePackage{enumitem}
+\RequirePackage{caption}
+\RequirePackage{algorithm,algpseudocode}
+\RequirePackage[most]{tcolorbox}
+\RequirePackage{etoolbox}
+\RequirePackage{titlesec}
+\RequirePackage{needspace}
+\RequirePackage{hyperref}
+\RequirePackage[nameinlink,noabbrev]{cleveref}
+
+% Change these named colors to recolor the whole package.
+\definecolor{optimBlue}{HTML}{496A83}
+\definecolor{optimGreen}{HTML}{607766}
+\definecolor{optimGray}{HTML}{7C8084}
+\definecolor{optimOchre}{HTML}{978263}
+\definecolor{optimInk}{HTML}{22272B}
+\definecolor{optimLink}{HTML}{365D78}
+\definecolor{optimMuted}{HTML}{606870}
+\hypersetup{unicode=true,colorlinks=true,linkcolor=optimLink,
+  citecolor=optimLink,urlcolor=optimLink,bookmarksnumbered=true,
+  pdfborder={0 0 0}}
+\urlstyle{same}
+\AtBeginDocument{\hypersetup{pdftitle={\@title}}}
+\pdfstringdefDisableCommands{\def\\{ }\def\thanks#1{}}
+
+% Dense enough for research, with modest air around structural elements.
+\linespread{1.035}
+\setlength{\parindent}{1.25em}
+\setlength{\parskip}{0pt}
+\setlength{\emergencystretch}{1.5em}
+\widowpenalty=10000 \clubpenalty=10000
+\raggedbottom
+\allowdisplaybreaks[1]
+\numberwithin{equation}{section}
+\setlist{topsep=4pt,itemsep=2pt,parsep=0pt}
+\setlist[itemize]{leftmargin=1.55em}
+\setlist[enumerate]{leftmargin=1.9em}
+\captionsetup{font=small,labelfont=bf,labelsep=period,skip=6pt}
+\setlength{\textfloatsep}{13pt plus 3pt minus 2pt}
+\setlength{\intextsep}{11pt plus 2pt minus 2pt}
+\setlength{\floatsep}{10pt plus 2pt minus 2pt}
+\titleformat{\section}{\large\bfseries\color{optimInk}}{\thesection}{0.7em}{}
+\titleformat{\subsection}{\normalsize\bfseries\color{optimInk}}{\thesubsection}{0.7em}{}
+\titleformat{\subsubsection}{\normalsize\itshape}{\thesubsubsection}{0.7em}{}
+\titlespacing*{\section}{0pt}{2.2ex plus .6ex minus .2ex}{1.05ex plus .2ex}
+\titlespacing*{\subsection}{0pt}{1.65ex plus .4ex}{.65ex plus .2ex}
+\titlespacing*{\subsubsection}{0pt}{1.3ex plus .3ex}{.5ex}
+
+% Standard \title, \author, \date; affiliations remain opt-in and transparent.
+\newcommand{\optim@affiliations}{}
+\newcommand{\affiliations}[1]{\gdef\optim@affiliations{#1}}
+\newcommand{\authorid}[1]{\textsuperscript{#1}}
+\newcommand{\email}[1]{\href{mailto:#1}{\texttt{#1}}}
+\newcommand{\optimtitlefont}{\fontsize{19}{23}\selectfont\bfseries}
+\newcommand{\optim@keywords}{}
+\newcommand{\keywords}[1]{\gdef\optim@keywords{#1}}
+\newcommand{\optim@maketitle}{%
+  \par\begingroup
+  \renewcommand{\thefootnote}{\fnsymbol{footnote}}%
+  \begin{center}
+    {\optimtitlefont\color{optimInk}\@title\par}
+    \ifdefempty{\@author}{}{%
+      \vspace{11pt}{\normalsize\begin{tabular}[t]{c}\@author\end{tabular}\par}
+    }
+    \ifdefempty{\optim@affiliations}{}{%
+      \vspace{4pt}{\small\color{optimMuted}\optim@affiliations\par}
+    }
+    \ifdefempty{\@date}{}{%
+      \vspace{7pt}{\small\color{optimMuted}\@date\par}
+    }
+  \end{center}
+  \@thanks
+  \endgroup\setcounter{footnote}{0}%
+  \vspace{4pt}\noindent{\color{optimBlue!45}\rule{\linewidth}{.45pt}}\par
+  \vspace{8pt}}
+% Preserve hyperref's title-footnote wrapper when it is present.
+\ifcsdef{HyOrg@maketitle}{\let\HyOrg@maketitle\optim@maketitle}
+  {\let\maketitle\optim@maketitle}
+\renewenvironment{abstract}{%
+  \begin{list}{}{\setlength{\leftmargin}{12pt}\setlength{\rightmargin}{12pt}}
+  \item[]\small
+  \noindent\textbf{\abstractname.}\enspace\ignorespaces
+}{%
+  \par\ifdefempty{\optim@keywords}{}{%
+    \smallskip\noindent\textbf{\ifoptim@russian Ключевые слова\else Keywords\fi:}
+    \optim@keywords\par
+  }
+  \end{list}\vspace{5pt}}
+
+% Straightforward amsthm environments: optional titles and labels behave
+% normally. Shared section counters by default; independent for legacy papers.
+% Body of a statement starts on a new line after its heading.
+\newtheoremstyle{optimstatement}{0pt}{0pt}{\normalfont}{0pt}
+  {\bfseries}{.\optim@thmlink}{\newline}{}
+% Стрелки между утверждением и его доказательством в другом месте текста:
+% \proofdown{lem:x} ПЕРЕД \begin{lemma} даёт в заголовке этой леммы ссылку вниз,
+% \begin{proof}[Доказательство леммы~\ref{lem:x}\proofup{lem:x}] --- ссылку вверх.
+\let\optim@thmlink\relax
+\newcommand{\proofdown}[1]{\gdef\optim@thmlink{\hypertarget{stmt:#1}{}\enspace
+  \hyperlink{prf:#1}{$\blacktriangledown$}\global\let\optim@thmlink\relax}}
+\newcommand{\proofup}[1]{\hypertarget{prf:#1}{}\enspace
+  \hyperlink{stmt:#1}{$\blacktriangle$}}
+\theoremstyle{optimstatement}
+\ifoptim@russian
+  \def\optim@theorem{Теорема}\def\optim@lemma{Лемма}
+  \def\optim@proposition{Предложение}\def\optim@corollary{Следствие}
+  \def\optim@assumption{Предположение}\def\optim@definition{Определение}
+  \def\optim@remark{Замечание}\def\optim@example{Пример}
+\else
+  \def\optim@theorem{Theorem}\def\optim@lemma{Lemma}
+  \def\optim@proposition{Proposition}\def\optim@corollary{Corollary}
+  \def\optim@assumption{Assumption}\def\optim@definition{Definition}
+  \def\optim@remark{Remark}\def\optim@example{Example}
+\fi
+\ifoptim@independent
+  \newtheorem{theorem}{\optim@theorem}
+  \newtheorem{lemma}{\optim@lemma}
+  \newtheorem{proposition}{\optim@proposition}
+  \newtheorem{corollary}{\optim@corollary}
+  \newtheorem{assumption}{\optim@assumption}
+  \newtheorem{definition}{\optim@definition}
+  \newtheorem{remark}{\optim@remark}
+  \newtheorem{example}{\optim@example}
+\else
+  \newtheorem{theorem}{\optim@theorem}[section]
+  \newtheorem{lemma}[theorem]{\optim@lemma}
+  \newtheorem{proposition}[theorem]{\optim@proposition}
+  \newtheorem{corollary}[theorem]{\optim@corollary}
+  \newtheorem{assumption}[theorem]{\optim@assumption}
+  \newtheorem{definition}[theorem]{\optim@definition}
+  \newtheorem{remark}[theorem]{\optim@remark}
+  \newtheorem{example}[theorem]{\optim@example}
+\fi
+\ifoptim@russian
+  \crefname{theorem}{теорема}{теоремы}\Crefname{theorem}{Теорема}{Теоремы}
+  \crefname{lemma}{лемма}{леммы}\Crefname{lemma}{Лемма}{Леммы}
+  \crefname{proposition}{предложение}{предложения}
+  \Crefname{proposition}{Предложение}{Предложения}
+  \crefname{corollary}{следствие}{следствия}
+  \Crefname{corollary}{Следствие}{Следствия}
+  \crefname{assumption}{предположение}{предположения}
+  \Crefname{assumption}{Предположение}{Предположения}
+  \crefname{definition}{определение}{определения}
+  \Crefname{definition}{Определение}{Определения}
+  \crefname{remark}{замечание}{замечания}
+  \Crefname{remark}{Замечание}{Замечания}
+  \crefname{example}{пример}{примеры}
+  \Crefname{example}{Пример}{Примеры}
+  \crefname{equation}{формула}{формулы}\Crefname{equation}{Формула}{Формулы}
+  \crefname{section}{раздел}{разделы}\Crefname{section}{Раздел}{Разделы}
+  \crefname{algorithm}{алгоритм}{алгоритмы}\Crefname{algorithm}{Алгоритм}{Алгоритмы}
+\else
+  \crefname{theorem}{Theorem}{Theorems}\Crefname{theorem}{Theorem}{Theorems}
+  \crefname{lemma}{Lemma}{Lemmas}\Crefname{lemma}{Lemma}{Lemmas}
+  \crefname{proposition}{Proposition}{Propositions}\Crefname{proposition}{Proposition}{Propositions}
+  \crefname{corollary}{Corollary}{Corollaries}\Crefname{corollary}{Corollary}{Corollaries}
+  \crefname{assumption}{Assumption}{Assumptions}\Crefname{assumption}{Assumption}{Assumptions}
+  \crefname{definition}{Definition}{Definitions}\Crefname{definition}{Definition}{Definitions}
+  \crefname{remark}{Remark}{Remarks}\Crefname{remark}{Remark}{Remarks}
+  \crefname{example}{Example}{Examples}\Crefname{example}{Example}{Examples}
+\fi
+
+% Color carries semantics, but headings remain black for print legibility.
+\tcbset{optimbox/.style={enhanced,breakable,sharp corners,
+  boxrule=.35pt,left=8pt,right=8pt,top=6pt,bottom=6pt,
+  before skip=9pt plus 2pt,after skip=9pt plus 2pt,
+  parbox=false},
+  optimresult/.style={optimbox,colback=optimBlue!5!white,
+    colframe=optimBlue!48!white,borderline west={1.2pt}{0pt}{optimBlue}},
+  optimassumption/.style={optimbox,colback=optimGreen!5!white,
+    frame hidden,borderline west={1.2pt}{0pt}{optimGreen}},
+  optimlemma/.style={optimbox,colback=optimGray!5!white,
+    frame hidden,borderline west={.65pt}{0pt}{optimGray!65}},
+  optimremark/.style={optimbox,colback=optimOchre!5!white,
+    frame hidden,borderline west={.8pt}{0pt}{optimOchre}}}
+\newcommand{\optim@plainspacing}[1]{%
+  \BeforeBeginEnvironment{#1}{\par\addvspace{9pt}}%
+  \AfterEndEnvironment{#1}{\par\addvspace{9pt}}}
+\ifoptim@boxes
+  \tcolorboxenvironment{theorem}{optimresult}
+  \tcolorboxenvironment{corollary}{optimresult}
+  \tcolorboxenvironment{proposition}{optimlemma}
+  \tcolorboxenvironment{assumption}{optimassumption}
+  \tcolorboxenvironment{lemma}{optimlemma}
+  \tcolorboxenvironment{remark}{optimremark}
+  \tcolorboxenvironment{definition}{optimlemma}
+  \tcolorboxenvironment{example}{optimlemma}
+\else
+  \forcsvlist{\optim@plainspacing}{theorem,lemma,proposition,corollary,assumption,definition,remark,example}
+\fi
+% Proofs deliberately use the untouched amsthm environment and QED placement.
+\BeforeBeginEnvironment{proof}{\Needspace{3\baselineskip}}
+
+% algorithm + algpseudocode: a quiet ruled float, no colored panel.
+% Line anchors include the algorithm number (no duplicate PDF destinations).
+\AtBeginDocument{\providecommand{\theHALG@line}{}%
+  \renewcommand{\theHALG@line}{\thealgorithm.\arabic{ALG@line}}}
+\floatstyle{ruled}\restylefloat{algorithm}
+\algrenewcommand\alglinenumber[1]{\scriptsize\color{optimMuted}#1:}
+\algrenewcommand\algorithmicrequire{\textbf{Input:}}
+\algrenewcommand\algorithmicensure{\textbf{Output:}}
+\algrenewcommand\algorithmiccomment[1]{\hfill\textcolor{optimMuted}{\(\triangleright\) #1}}
+\ifoptim@russian
+  \floatname{algorithm}{Алгоритм}
+  \algrenewcommand\algorithmicrequire{\textbf{Вход:}}
+  \algrenewcommand\algorithmicensure{\textbf{Выход:}}
+  \algrenewcommand\algorithmicfor{\textbf{для}}
+  \algrenewcommand\algorithmicdo{\textbf{выполнять}}
+  \algrenewcommand\algorithmicend{\textbf{конец}}
+  \algrenewcommand\algorithmicif{\textbf{если}}
+  \algrenewcommand\algorithmicthen{\textbf{то}}
+  \algrenewcommand\algorithmicelse{\textbf{иначе}}
+  \algrenewcommand\algorithmicreturn{\textbf{вернуть}}
+\fi
+\endinput
