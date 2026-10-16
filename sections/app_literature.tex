@@ -3,7 +3,7 @@
 % В узких колонках таблиц формулам разрешено переноситься.
 \relpenalty=500 \binoppenalty=700
 
-В таблице~\ref{tab:lit-convex} собраны известные верхние оценки для выпуклого детерминированного случая. Здесь $R=\norm{x^0-x^\ast}$, $F_0=f(x^0)-f^\ast$, запись $O(\cdot)$ скрывает абсолютные константы, $\widetilde O(\cdot)$ --- ещё и логарифмические множители. Условие гладкости в столбце <<Гл.>>: sym --- симметричное (определение~\ref{def:class}), asym --- локальное несимметричное, $\ell$ --- с общей функцией $\ell(\norm{\nabla f})$, $(H_0,H_1)$ --- $\norm{\nabla^2f}\le H_0+H_1(f-f^\ast)$.
+В таблице~\ref{tab:lit-convex} собраны известные верхние оценки для выпуклого детерминированного случая. Здесь $R=\norm{x^0-x^\ast}$, $F_0=f(x^0)-f^\ast$, запись $O(\cdot)$ скрывает абсолютные константы, $\widetilde O(\cdot)$ --- ещё и логарифмические множители. В столбце <<Гл.>> sym обозначает симметричную $(L_0,L_1)$-гладкость (определение~\ref{def:class}), asym --- локальную несимметричную гладкость, $\ell$ --- гладкость с общей функцией $\ell(\norm{\nabla f})$, $(H_0,H_1)$ --- условие $\norm{\nabla^2f}\le H_0+H_1(f-f^\ast)$.
 
 \begin{center}
 \footnotesize
@@ -14,26 +14,28 @@
 Работа & Гл. & Метод & Сложность\\
 \midrule
 \citet{koloskova2023revisiting} & sym $+$ $L$-гл. & clipped GD & $O\bigl(\frac{L_0R^2}{\varepsilon}+L_1R^2\sqrt{\frac L\varepsilon}\bigr)^{a}$\\
-\citet{takezawa2024polyak} & sym $+$ $L$-гл. & шаг Поляка & $O\bigl(\frac{L_0R^2}{\varepsilon}+L_1R^2\sqrt{\frac L\varepsilon}\bigr)^{a}$\\
+\citet{takezawa2024polyak} & sym $+$ $L$-гл. & GD с шагом Поляка & $O\bigl(\frac{L_0R^2}{\varepsilon}+L_1R^2\sqrt{\frac L\varepsilon}\bigr)^{a}$\\
 \citet{li2023generalized} & $\ell$ & GD & $O\bigl(\frac{\ell(G)R^2}{\varepsilon}\bigr)$, $G=\norm{\nabla f(x^0)}^{f}$\\
 \citet{li2023generalized} & $\ell$ & быстрый градиентный метод & $O\bigl((1+L_1^2R^2+\frac{L_1^2F_0}{L_0})\sqrt{\frac{F_0+L_0R^2}\varepsilon}\bigr)^{g}$\\
-\citet{gorbunov2024methods} & sym & $(L_0,L_1)$-GD, шаг Поляка & $O\bigl(\frac{L_0R^2}{\varepsilon}+L_1^2R^2\bigr)$\\
+\citet{gorbunov2024methods} & sym & $(L_0,L_1)$-GD, GD с шагом Поляка & $O\bigl(\frac{L_0R^2}{\varepsilon}+L_1^2R^2\bigr)$\\
 \citet{gorbunov2024methods} & sym & $(L_0,L_1)$-STM & $O\bigl(\sqrt{(1+L_1Re^{L_1R})\frac{L_0R^2}{\varepsilon}}\bigr)$\\
 \citet{vankov2025optimizing} & sym & GD (три правила шага), clipping & $O\bigl(\frac{L_0R^2}{\varepsilon}+L_1R\log\frac{F_0}{\varepsilon}\bigr)$\\
-\citet{vankov2025optimizing} & sym & нормированный GD, шаг Поляка & $O\bigl(\frac{L_0R^2}{\varepsilon}+L_1^2R^2\bigr)$\\
+\citet{vankov2025optimizing} & sym & нормированный GD, GD с шагом Поляка & $O\bigl(\frac{L_0R^2}{\varepsilon}+L_1^2R^2\bigr)$\\
 \citet{vankov2025optimizing} & sym & AGMsDR$^{h}$ & $O\bigl(\sqrt{\frac{L_0R^2}{\varepsilon}}+(L_1R)^{2/3}\log\frac{F_0}{\varepsilon}\bigr)$ итераций\\
-\citet{lobanov2025linear} & asym & GD, нормированный и clipped GD & $O\bigl(\frac{L_0R^2}{\varepsilon}+L_1R\log\frac{F_0}{\varepsilon}\bigr)$\\
+\citet{lobanov2025linear} & asym & GD, clipped GD & $O\bigl(\frac{L_0R^2}{\varepsilon}+L_1R\log\frac{F_0}{\varepsilon}\bigr)$\\
+\citet{lobanov2025linear} & asym & нормированный GD & $O\bigl(\bigl(\frac{L_0R^2}{\varepsilon}+L_1R\bigr)\log\frac{F_0}{\varepsilon}\bigr)$\\
 \citet{tyurin2025unified} & $\ell$ & GD с шагом $\int_0^1\frac{dv}{\ell(\norm{\nabla f(x^k)}(1+v))}$ & $O\bigl(\frac{L_0R^2}{\varepsilon}+\min\bigl\{L_1R\sqrt{\frac{F_0}\varepsilon},L_1^2R^2,\frac{L_1\norm{\nabla f(x^0)}R^2}{\varepsilon}\bigr\}\bigr)$\\
 \citet{krivchenko2026computer} & sym & GD, PEP & уточнение констант в оценке с $L_1R\log\frac{F_0}{\varepsilon}$\\
 \citet{oikonomidis2025nonlinearly} & анизотропная & нелинейно предобусловленный GD & $O(\mathcal D_0/\varepsilon)$, $\mathcal D_0$ --- супремум по подуровневому множеству\\
-\citet{kovalev2026normalized} & sym & шаг Поляка с неточным нормированным градиентом & $O\bigl(\frac{L_0R^2}{\varepsilon}+L_1^2R^2\bigr)$\\
+\citet{kovalev2026normalized} & sym & GD с шагом Поляка и неточным нормированным градиентом & $O\bigl(\frac{ML_0R^2}{\varepsilon}+\frac{ML_1^2R^2}{c}\bigr)^{k}$\\
 \citet{tyurin2026accelerated} & $\ell$ & ускоренный метод & $O\bigl(\sqrt{\frac{L_0R^2}{\varepsilon}}+L_1R\log_+\min\bigl\{\frac{L_1^2F_0}{L_0},\frac{F_0}{\varepsilon}\bigr\}\bigr)^{i}$\\
 \citet{borodich2026graal} & sym & GRAAL с ускорением & $O\bigl(1+\sqrt{\frac{L_0R^2}{\varepsilon}}+(L_1R)^3\bigr)^{j}$\\
-\citet{lobanov2026accelerated} & $(H_0,H_1)$ & ускоренный, маломерная релаксация, рестарты & $\widetilde O\bigl(\sqrt{\frac{H_0\tilde R^2}{\varepsilon}}+\sqrt{H_1\tilde R^2}\log\frac{F_0}{\varepsilon}\bigr)$\\
+\citet{lobanov2026accelerated} & $(H_0,H_1)$ & ускоренный, маломерная релаксация, рестарты & $\widetilde O\bigl(\sqrt{\frac{H_0\tilde R^2}{\varepsilon}}+\sqrt{H_1\tilde R^2}\log\frac{F_0}{\varepsilon}\bigr)^{l}$\\
 \midrule
-\textbf{Эта статья} (теорема~\ref{thm:upper}) & sym & ускоренный, конечный поиск & $5\sqrt{\frac{L_0R^2}{\varepsilon}}+O\bigl((1+L_1R)\log(2+L_1R)\bigr)$\\
+\textbf{Эта статья} (теорема~\ref{thm:upper}) & sym & ускоренный, неточный одномерный поиск & $5\sqrt{\frac{L_0R^2}{\varepsilon}}+O\bigl((1+L_1R)\log(2+L_1R)\bigr)$\\
 \bottomrule
 \end{tabularx}
 \par\smallskip\raggedright
-$a$: выведено нами из теоремы ($c=L_0/L_1$, дополнительно предполагается $L$-гладкость). $f$: при условии на радиус из определения $(r,\ell)$-гладкости. $g$: пересчёт из \citet{vankov2025optimizing}. $h$: каждая итерация содержит точную одномерную минимизацию. $i$: плюс член, зависящий от инициализации. $j$: при начальном шаге $\eta_0=e^{-L_1R}/L_0$, полная оценка содержит ещё $(1+(L_1R)^2)\log(1/(\eta_0L_0))$.
+$a$: выведено нами из теоремы ($c=L_0/L_1$, дополнительно предполагается $L$-гладкость). $f$: при условии на радиус из определения $(r,\ell)$-гладкости. $g$: пересчёт из \citet{vankov2025optimizing}. $h$: каждая итерация содержит точную одномерную минимизацию. $i$: плюс член, зависящий от инициализации. $j$: при начальном шаге $\eta_0=e^{-L_1R}/L_0$, полная оценка содержит ещё $(1+(L_1R)^2)\log(1/(\eta_0L_0))$. $k$: $M$ --- оценка нормы градиента на траектории, $0<c<\min\{\varepsilon/R,L_0/L_1\}$, ошибка градиента достаточно мала. $l$: $\tilde R$ --- радиус начального подуровневого множества вокруг $x^\ast$.
 \end{center}
+
