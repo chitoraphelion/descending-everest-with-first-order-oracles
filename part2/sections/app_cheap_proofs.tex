@@ -1,0 +1,527 @@
+\section{Доказательства утверждений о методе YETI}\label{app:cheap-proofs}
+
+\subsection{Нижние оценки по истории}\label{app:history-proofs}
+
+\begin{proof}[Доказательство леммы~\ref{lem:history-small-gradient}\proofup{lem:history-small-gradient}]
+Выберем точку $w\in B(0,R)$, минимизирующую линейную функцию
+$u\mapsto\ip{\nabla f(z)}u$. По определению нормального конуса
+$\ip{v_z}{w-z}\le0$. Поэтому
+\[
+ f(z)-\widetilde f(z)=\ip{\nabla f(z)}{z-w}
+ \le\ip g{z-w}
+ \by{\le}{(a)}\norm g\norm{z-w}
+ \le2R\norm g,
+\]
+где (a) следует из неравенства Коши--Буняковского--Шварца.
+После записи $z$ в историю имеем $f(w_{\rm best})\le f(z)$ и
+$\widetilde f_{\rm best}\ge\widetilde f(z)$, что завершает доказательство.
+\end{proof}
+
+\subsection{Нижняя оценка по ответам отдельных компонент}\label{app:component-history}
+
+Критерий остановки~\eqref{eq:history-stop} использует нижние
+оценки~\eqref{eq:history-full-lower}, а каждая из них требует ответов
+всех $n$ компонент в одной и той же точке. Эвристика в экспериментах
+(приложение~\ref{app:experiments}) запрашивает отдельные компоненты
+в разных точках. Покажем, что и такие ответы можно объединить в нижнюю
+оценку $f^\ast$, не делая новых запросов. Этот подраздел нужен только
+для экспериментов: в доказательстве оценки сложности YETI он
+не используется.
+
+Выберем для каждого индекса $i$ один из уже полученных ответов
+этой компоненты; пусть он получен в точке $p_i$. Положим
+\begin{equation}\label{eq:mixed-history-lower}
+ \widetilde f_{\rm mix}
+ =\frac1n\sum_{i=1}^n\bigl(f_i(p_i)-\ip{\nabla f_i(p_i)}{p_i}\bigr)
+ -R\,\Bigl\|\frac1n\sum_{i=1}^n\nabla f_i(p_i)\Bigr\|.
+\end{equation}
+Если все точки $p_i$ совпадают с некоторой точкой $p$, то
+$\widetilde f_{\rm mix}=\widetilde f(p)$, то есть~\eqref{eq:mixed-history-lower}
+обобщает~\eqref{eq:history-full-lower}.
+
+\begin{proposition}\label{prop:mixed-history}
+Выполнено $\widetilde f_{\rm mix}\le f^\ast$. Поэтому величину
+$\widetilde f_{\rm mix}$ можно учитывать в максимуме $\widetilde f_{\rm best}$
+наравне с оценками~\eqref{eq:history-full-lower}. При замене одного
+выбранного ответа пересчёт обеих сумм в~\eqref{eq:mixed-history-lower}
+требует $O(d)$ арифметических операций и не требует новых запросов к оракулу.
+\end{proposition}
+
+\begin{proof}
+В силу выпуклости компонент (предположение~\ref{asm:components})
+для любого $w$
+\[
+ f(w)\ge\frac1n\sum_i\bigl(f_i(p_i)+\ip{\nabla f_i(p_i)}{w-p_i}\bigr).
+\]
+При $w=x^\ast$ предположение~\ref{asm:minimizer}
+и неравенство Коши--Буняковского--Шварца дают
+$f^\ast\ge\widetilde f_{\rm mix}$. Замена ответа с индексом $i$
+меняет только одно слагаемое скалярной суммы и одно слагаемое
+векторной суммы.
+\end{proof}
+
+Оценку~\eqref{eq:mixed-history-lower} можно вычислить только после того,
+как для каждой компоненты получен хотя бы один ответ. Никаких условий
+на точки $p_i$ или на порядок, в котором они получены, не требуется.
+При последующих заменах ответов значение $\widetilde f_{\rm mix}$ может
+уменьшиться, поэтому в $\widetilde f_{\rm best}$ хранится максимум всех
+уже полученных нижних оценок. Для пересчёта $\widetilde f_{\rm mix}$
+нужно хранить по одному выбранному ответу каждой компоненты; это
+дополнительная память по сравнению с хранением только лучшей нижней
+оценки и лучшей точки.
+
+\Needspace{12\baselineskip}
+\subsection{Локальный решатель}\label{app:local-proofs}
+
+\begin{proof}[Доказательство леммы~\ref{lem:local-projection}\proofup{lem:local-projection}]
+\leavevmode
+\begin{itemize}
+\item Для $\zeta\ge0$ рассмотрим точку
+\[
+ z_\zeta=\Pi_{B(0,R)}\Bigl(\frac{b+\zeta y}{1+\zeta}\Bigr).
+\]
+Она непрерывно зависит от $\zeta$ и стремится к $y$ при $\zeta\to\infty$.
+Если $\norm{z_0-y}\le r$, достаточно взять $\zeta=0$. Иначе существует
+$\zeta>0$, для которого $\norm{z_\zeta-y}=r$. Вид нормального конуса
+к шару $B(0,R)$ даёт~\eqref{eq:two-ball-normal}. Для любого $t\in\mathcal K$ получаем
+\[
+ \ip{b-z}{t-z}
+ =\xi\ip z{t-z}+\zeta\ip{z-y}{t-z}
+ \by{\le}{(a)}0.
+\]
+Здесь (a) следует из того, что $\xi z$ и $\zeta(z-y)$ --- нормали
+к шарам $B(0,R)$ и $B(y,r)$ в точке $z$.
+Это неравенство характеризует проекцию на $\mathcal K$ и доказывает
+утверждение, в том числе когда шары совпадают или один из них вложен в другой.
+\item Неравенство \eqref{eq:local-bregman} следует из
+леммы~\ref{lem:local-bregman} для $\varphi=P_i$ и $L=L_i$.
+В шаре радиуса $3r$ лежит и вспомогательная точка из доказательства
+этой леммы, поэтому к ней применима оценка гладкости.
+Из выпуклости $P_i$, следующей из предположения~\ref{asm:components},
+получаем неотрицательность
+её отклонения от касательной. Кокоэрцитивность $P$ следует из
+леммы~\ref{lem:local-cocoercivity}: на выпуклом шаре $B(y,r)$
+средний гессиан $P$ лежит между $0$ и $\overline LI$.
+Это локальный вариант классического свойства
+кокоэрцитивности~\citep{baillon1977}.
+\end{itemize}
+\end{proof}
+
+\Needspace{14\baselineskip}
+Для локальной задачи и эпохи SVRG сохраняем обозначения $u$, $w$, $s$,
+$h_s$, $M$ и $\overline L$ из раздела~\ref{sec:local-solver}.
+
+\begin{lemma}[уменьшение функции Ляпунова за эпоху]\label{lem:svrg-contraction}
+Положим
+\begin{equation}\label{eq:svrg-potential}
+ \Psi(w,s)=\norm{w-u}^2
+ +4h_s^2\sum_{j=0}^{M-1}(1-h_s\lambda)^j\,
+ \sum_{i=1}^n\frac{\norm{\nabla P_i(s)-\nabla P_i(u)}^2}{nL_i/\overline L}.
+\end{equation}
+Тогда условно относительно всей истории до начала эпохи
+\begin{equation}\label{eq:svrg-contraction}
+ \begin{gathered}
+ \E\Psi(w^+,s^+)\le\tfrac12\Psi(w,s),\\
+ \Psi(y,y)\le\left(1+\frac{2\overline L}{3\lambda}\right)\norm{y-u}^2.
+ \end{gathered}
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+\leavevmode
+\begin{itemize}
+\item Пусть случайный индекс $I$ принимает значение $i$ с вероятностью
+$L_i/(n\overline L)$. Тогда
+\[
+ v_I-\nabla P(u)
+ =\frac{\nabla P_I(x)-\nabla P_I(u)}{L_I/\overline L}
+ +\Bigl(\nabla P(s)-\nabla P(u)
+ -\frac{\nabla P_I(s)-\nabla P_I(u)}{L_I/\overline L}\Bigr).
+\]
+Второе слагаемое центрировано, а математическое ожидание квадрата его нормы
+не превосходит суммы из~\eqref{eq:svrg-potential}. Для любой точки
+$t\in B(y,r)$
+\begin{equation}\label{eq:svrg-variance-bound}
+ \sum_{i=1}^n\frac{\norm{\nabla P_i(t)-\nabla P_i(u)}^2}{nL_i/\overline L}
+ \by{\le}{(a)}2\overline L\bigl(P(t)-P(u)-\ip{\nabla P(u)}{t-u}\bigr),
+\end{equation}
+где (a) следует из выбора вероятностей $L_i/(n\overline L)$, оценки~\eqref{eq:local-bregman}
+и равенства $P=\frac1n\sum_iP_i$. Поэтому
+\begin{align*}
+ \E\norm{v_I-\nabla P(u)}^2&\by{\le}{(a)}2\sum_{i=1}^n\frac{\norm{\nabla P_i(x)-\nabla P_i(u)}^2}{nL_i/\overline L}+2\sum_{i=1}^n\frac{\norm{\nabla P_i(s)-\nabla P_i(u)}^2}{nL_i/\overline L}
+ \\&\by{\le}{(b)}4\overline L\bigl(P(x)-P(u)-\ip{\nabla P(u)}{x-u}\bigr)
+ +2\sum_{i=1}^n\frac{\norm{\nabla P_i(s)-\nabla P_i(u)}^2}{nL_i/\overline L}.
+\end{align*}
+Здесь (a) следует из неравенства
+\[
+ \norm{a+b}^2\le2\norm a^2+2\norm b^2,
+\]
+(b) --- из~\eqref{eq:svrg-variance-bound} при $t=x$.
+\item Оптимальность $u$ означает
+$u=\Pi_{\mathcal K}(u-h_s\nabla P(u))$. Поэтому
+\begin{align*}
+ \E\norm{x^+-u}^2&\by{\le}{(a)}
+ \norm{x-u}^2-2h_s\ip{\nabla P(x)-\nabla P(u)}{x-u}
+       +h_s^2\E\norm{v_I-\nabla P(u)}^2
+ \\&\by{\le}{(b)}
+ (1-h_s\lambda)\norm{x-u}^2
+ -\frac43h_s\bigl(P(x)-P(u)-\ip{\nabla P(u)}{x-u}\bigr)
+ \\&+2h_s^2\sum_{i=1}^n\frac{\norm{\nabla P_i(s)-\nabla P_i(u)}^2}{nL_i/\overline L}.
+\end{align*}
+Здесь (a) следует из нерастяжимости проекции и несмещённости $v_I$,
+(b) --- из сильной выпуклости $P$, предыдущего пункта и равенства
+$2h_s-4h_s^2\overline L=\frac43h_s$.
+\item По \eqref{eq:svrg-parameters} имеем $0<h_s\lambda\le1/6$
+и $h_s\lambda M\ge7/10$. Развернём полученное рекуррентное неравенство на всю эпоху.
+Так как $8h_s^2\overline L=\frac43h_s$, слагаемые с остатками
+линеаризации в точках $x_j$ сокращаются, и
+\[
+ \E\Psi(w^+,s^+) \by{\le}{(a)}
+ (1-h_s\lambda)^M\norm{w-u}^2
+ +2h_s^2\sum_{j=0}^{M-1}(1-h_s\lambda)^j\,\sum_{i=1}^n\frac{\norm{\nabla P_i(s)-\nabla P_i(u)}^2}{nL_i/\overline L} \by{\le}{(b)}\tfrac12\Psi(w,s).
+\]
+Здесь (a) следует из рекуррентного неравенства предыдущего пункта,
+оценки~\eqref{eq:svrg-variance-bound} при $t=s^+$ и неравенства Йенсена
+для выпуклой функции $t\mapsto P(t)-P(u)-\ip{\nabla P(u)}{t-u}$,
+(b) --- из $(1-h_s\lambda)^M\le e^{-7/10}<1/2$.
+Наконец, локальная гладкость даёт
+\[
+ P(y)-P(u)-\ip{\nabla P(u)}{y-u}\le\frac{\overline L}2\norm{y-u}^2,
+\]
+поэтому по~\eqref{eq:svrg-variance-bound} сумма
+из~\eqref{eq:svrg-potential} при $s=y$ не превосходит $\overline L^2\norm{y-u}^2$.
+Вместе с
+\[
+ \sum_{j=0}^{M-1}(1-h_s\lambda)^j\le\frac1{h_s\lambda}
+\]
+это даёт
+\[
+ \Psi(y,y)\le\left(1+\frac{4h_s\overline L^2}{\lambda}\right)\norm{y-u}^2
+ =\left(1+\frac{2\overline L}{3\lambda}\right)\norm{y-u}^2.
+\]
+\end{itemize}
+\end{proof}
+
+\begin{proof}[Доказательство леммы~\ref{lem:local-certificate}\proofup{lem:local-certificate}]
+\leavevmode
+\begin{itemize}
+\item По лемме~\ref{lem:local-projection} отображение
+$I-\nabla P/\overline L$ нерастяжимо на $\mathcal K$. Сравнивая
+проекции точек $w-\nabla P(w)/\overline L$ и $u-\nabla P(u)/\overline L$,
+получаем первую оценку в \eqref{eq:sharp-residual}. Для второй оценки имеем
+\begin{align*}
+ \norm e^2&=\overline L^2\norm{w-z}^2
+ -2\overline L\ip{\nabla P(w)-\nabla P(z)}{w-z}
+ +\norm{\nabla P(w)-\nabla P(z)}^2
+ \\&\by{\le}{(a)}\overline L\ip e{w-z}
+ \by{\le}{(b)}\overline L\ip e{w-u}
+ \by{\le}{(c)}\overline L\norm e\norm{w-u}.
+\end{align*}
+Здесь (a) следует из кокоэрцитивности $\nabla P$, (b) --- из неравенства
+\[
+ \ip e{z-u}\ge P(z)-P(u)\ge0,
+\]
+которое верно, поскольку $e\in\nabla P(z)+N_{\mathcal K}(z)$
+по определению проекции, (c) --- из неравенства
+Коши--Буняковского--Шварца.
+\item Если $\norm{w-u}$ удовлетворяет условию леммы, то
+\[
+ \norm e\le\overline L\norm{w-u}
+ \le\frac45\lambda\bigl(\norm{y-u}-\norm{w-u}\bigr)
+ \le\frac45\lambda\norm{y-z}
+ \le\frac45(\lambda+\beta)\norm{y-z}.
+\]
+Предпоследний переход следует из $\norm{z-u}\le\norm{w-u}$
+и неравенства треугольника. Значит, выполнено второе
+условие~\eqref{eq:certificate-test}.
+Если $y=u$, то $\Psi(y,y)=0$, после первой эпохи почти наверное $w=u$,
+и набор принимается. При $y\ne u$ после $j$ эпох
+лемма~\ref{lem:svrg-contraction} и неравенство Маркова дают
+\[
+ \begin{aligned}
+ \Pr(T_{\rm ep}>j)
+ &\le\Pr\left(\norm{w_j-u}>\frac{4\lambda}{5\overline L+4\lambda}\norm{y-u}\right)\\
+ &\le\left(1+\frac{5\overline L}{4\lambda}\right)^2
+ \frac{\E\Psi(w_j,s_j)}{\norm{y-u}^2}
+ \le\Gamma2^{-j}.
+ \end{aligned}
+\]
+При выводе этой оценки эпохи можно мысленно продолжить и после первого
+принятия, используя независимые выборки. Сумма правых частей конечна, что доказывает
+оба утверждения о времени остановки.
+\end{itemize}
+\end{proof}
+
+\subsection{Убывание функции Ляпунова}\label{app:potential-proof}
+
+\begin{lemma}[убывание функции Ляпунова]\label{lem:outer-potential}
+Во всех состояниях метода выполнены условия
+\begin{equation}\label{eq:outer-invariant}
+ \begin{gathered}
+ x,v\in B(0,R),\\
+ \mathcal A\ge R^2/(2\Delta),\\
+ h\ge\tfrac12\lambda_\downarrow(\mathcal A),\\
+ \mathcal A\bigl(f(x)-f^\ast\bigr)+\tfrac12\norm{v-x^\ast}^2\le R^2.
+ \end{gathered}
+\end{equation}
+Обозначим левую часть последнего неравенства через $\Phi$
+(функция Ляпунова). Всегда $\alpha\le\frac12(r/R)^{2/3}\le\frac12$ и $\lambda\le2h$.
+Принятие точки, предложенной эвристическим блоком, не меняет $v,\mathcal A,h$
+и не увеличивает $\Phi$.
+При нарушении \eqref{eq:simple-curvature-test} полупространство
+$\mathcal H_y$ содержит $x^\ast$ и
+\begin{equation}\label{eq:cut-descent}
+ \Phi^+\le\Phi-\frac{9r^2}{128\alpha^2}.
+\end{equation}
+Пусть $y=(1-\alpha)x+\alpha v$ --- центр локальной задачи
+из~\eqref{eq:outer-step-setup}, а $z$ --- точка, возвращённая решателем.
+Если набор $(z,g,\beta)$ принят по второму условию~\eqref{eq:certificate-test}, то
+\begin{equation}\label{eq:damped-descent}
+ \Phi^+\le\Phi-\frac9{50}\frac{\norm{y-z}^2}{\alpha^2}.
+\end{equation}
+При любом способе остановки невязка ответа не превосходит
+$\varepsilon/2$.
+\end{lemma}
+
+\begin{proof}
+\leavevmode
+\begin{itemize}
+\item В начальный момент
+\[
+ \Phi_0=\frac{R^2}{2\Delta}\bigl(f(0)-f^\ast\bigr)
+          +\tfrac12\norm{x^\ast}^2
+ \by{\le}{\text{\ref{asm:minimizer}, \ref{asm:initial-gap}}}R^2.
+\]
+Функция $\lambda_\downarrow$ не возрастает, поэтому
+$\lambda_\downarrow(\mathcal A)\le\lambda_{\uparrow}$ и
+$\lambda\ge\lambda_\downarrow(\mathcal A)$.
+Равенство $\lambda\mathcal A\alpha^2=1-\alpha$ влечёт
+$\alpha\le\frac12(r/R)^{2/3}$, поскольку функция $t\mapsto(1-t)/t^2$
+убывает. Неравенство $h\ge\lambda_\downarrow(\mathcal A)/2$ влечёт
+$\lambda\le2h$.
+\item По правилу принятия эвристической точки
+$z\in B(0,R)$ и $f(z)\le f(x)$. Замена $x$ на $z$ меняет функцию Ляпунова на
+$\mathcal A(f(z)-f(x))\le0$, а $v,\mathcal A,h$ не меняются.
+Поэтому условия~\eqref{eq:outer-invariant} сохраняются.
+\item Из предположения~\ref{asm:components}
+и следствия~\ref{cor:curvature-lower-gap} получаем
+\[
+ \ip{\nabla f(y)}{x^\ast-y}\le f^\ast-f(y)
+ \le-\frac{\ell(y)-\frac32L_0-2L_1^2\delta}{2L_1^2},
+\]
+то есть $x^\ast\in\mathcal H_y$. Пусть условие~\eqref{eq:simple-curvature-test}
+нарушено. Так как $L_1r\le1/2$,
+\[
+ \frac{\ell(y)-\frac32L_0-2L_1^2(\delta+R^2/\mathcal A)}{2L_1^2}
+ \by{>}{(a)}\frac{(1-e^{-L_1r})\ell(y)}{2L_1^2}
+ \by{\ge}{(b)}\frac{3r\ell(y)}{8L_1}>0.
+\]
+Здесь (a) следует из нарушения~\eqref{eq:simple-curvature-test},
+(b) --- из $1-e^{-s}\ge3s/4$ при $0\le s\le1/2$.
+Так как $f(x)-f^\ast\le\Phi/\mathcal A\le R^2/\mathcal A$,
+\[
+ \ip{\nabla f(y)}{y-x}\by{\ge}{\text{\ref{asm:components}}}f(y)-f(x)
+ \ge f(y)-f^\ast-\frac{R^2}{\mathcal A}
+ \by{\ge}{(b)}\frac{\ell(y)-\frac32L_0-2L_1^2(\delta+R^2/\mathcal A)}{2L_1^2}.
+\]
+Переход (b) вытекает из следствия~\ref{cor:curvature-lower-gap}.
+Правая часть положительна, следовательно, $\nabla f(y)\ne0$. Используя
+$v-y=(1-\alpha)(y-x)/\alpha$ и $\norm{\nabla f(y)}\le\ell(y)/L_1$,
+получаем
+\begin{align*}
+ \dist(v,\mathcal H_y)&=\frac1{\norm{\nabla f(y)}}\left(\ip{\nabla f(y)}{v-y}
+   +\frac{\ell(y)-\frac32L_0-2L_1^2\delta}{2L_1^2}\right)
+ \\&\ge\frac{\ell(y)-\frac32L_0-2L_1^2(\delta+R^2/\mathcal A)}
+          {2L_1^2\,\alpha\norm{\nabla f(y)}}
+ \ge\frac{3r}{8\alpha}.
+\end{align*}
+Проекция на $\mathcal H_y$ уменьшает квадрат расстояния до $x^\ast$
+не менее чем на квадрат расстояния от $v$ до $\mathcal H_y$, а проекция на $B(0,R)$ его не увеличивает
+по предположению~\ref{asm:minimizer}.
+Это даёт \eqref{eq:cut-descent}. Принадлежность $x$ полупространству
+для рассуждения не нужна.
+\item Пусть набор принят по второму условию~\eqref{eq:certificate-test}.
+Тогда $g$ является субградиентом $f+I_{B(0,R)}$ в точке $z$, и
+\begin{align*}
+ \Phi^+-\Phi&\by{\le}{(a)}
+ \gamma\mathcal A\ip g{z-x}+\gamma a_\lambda\ip g{z-v}
+       +\tfrac12\gamma^2a_\lambda^2\norm g^2 =-\gamma(\mathcal A+a_\lambda)\ip g{y-z}
+       +\tfrac12\gamma^2a_\lambda^2\norm g^2
+ \\&=\tfrac12\gamma^2a_\lambda^2
+       \bigl(\norm e^2-(\lambda+\beta)^2\norm{y-z}^2\bigr) \by{\le}{(b)}
+ -\frac9{50}\gamma^2a_\lambda^2(\lambda+\beta)^2\norm{y-z}^2
+ =-\frac9{50\alpha^2}\norm{y-z}^2.
+\end{align*}
+В (a) использованы выпуклость $f$ (предположение~\ref{asm:components}),
+комбинация~\eqref{eq:damped-update} и нерастяжимость проекции,
+сохраняющей $x^\ast$ по предположению~\ref{asm:minimizer};
+(b) следует из $\norm e\le\frac45(\lambda+\beta)\norm{y-z}$.
+В последнем равенстве использованы равенства $\gamma(\lambda+\beta)=\lambda$ и
+$\lambda a_\lambda=1/\alpha$.
+При $\beta>0$ смещение равно $r$. Все новые точки принадлежат
+$B(0,R)$, а $\mathcal A$ не убывает. На повышающем шаге
+$h^+=2\lambda\ge\lambda_\downarrow(\mathcal A^+)/2$,
+на понижающем --- $h^+=\lambda/2\ge\lambda_\downarrow(\mathcal A^+)/2$.
+Поэтому условия~\eqref{eq:outer-invariant} сохраняются.
+\item Если принят набор с $\norm g\le\varepsilon/(4R)$, то для
+$z,x^\ast\in B(0,R)$
+\[
+ f(z)-f^\ast
+ \by{\le}{(a)}\ip g{z-x^\ast}
+ \by{\le}{(b)}2R\norm g\le\varepsilon/2,
+\]
+где (a) следует из $g\in\partial(f+I_{B(0,R)})(z)$, (b) --- из
+неравенства Коши--Буняковского--Шварца
+и предположения~\ref{asm:minimizer}.
+Остановка по росту $\mathcal A$ даёт
+$f(x)-f^\ast\le R^2/\mathcal A\le\varepsilon/2$.
+По~\eqref{eq:history-full-lower} и предложению~\ref{prop:mixed-history}
+имеем $\widetilde f_{\rm best}\le f^\ast$. Поэтому при остановке
+по критерию~\eqref{eq:history-stop}
+\[
+ f(w_{\rm best})-f^\ast
+ \le f(w_{\rm best})-\widetilde f_{\rm best}\le\varepsilon/2.
+\]
+Наконец, набор, принятый по второму условию при $\beta=0$ и
+$\lambda=\varepsilon/(8rR)$, уже удовлетворяет
+\[
+ \norm g\le\frac95\cdot\frac{\varepsilon}{8rR}\,r=\frac{9\varepsilon}{40R}<\frac{\varepsilon}{4R}.
+\]
+Поэтому отдельное правило остановки при $\lambda=\varepsilon/(8rR)$ не требуется.
+\end{itemize}
+\end{proof}
+
+\subsection{Число основных итераций}\label{app:count-proof}
+
+\begin{lemma}[число основных итераций]\label{lem:outer-count}
+При любом выборе эвристики в алгоритме~\ref{alg:cheap}
+метод почти наверное останавливается
+не позже чем через $K_{\rm out}$ основных итераций, где
+$K_{\rm out}$ --- детерминированная величина, удовлетворяющая оценке
+\begin{equation}\label{eq:outer-budget}
+ \begin{aligned}
+ K_{\rm out}\lesssim{}
+ &\left(\frac Rr\right)^{2/3}\left(1+\log\frac\Delta\varepsilon\right)
+ +\log\left(2+\frac{rR\lambda_{\uparrow}}\varepsilon\right)\\
+ &+\frac{L_1R}{\sqrt n}\log\frac\Delta\varepsilon
+ +\sqrt{\frac{(L_0+L_1^2\delta)R^2}{n\varepsilon}}.
+ \end{aligned}
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+Будем учитывать только итерации, после которых метод ещё не остановился;
+на них $\mathcal A<2R^2/\varepsilon$.
+Принятие результата эвристики не меняет $\mathcal A,h$
+и не увеличивает функцию Ляпунова $\Phi$.
+
+\begin{itemize}
+\item Пусть $n_U$ --- число итераций, повышающих регуляризацию.
+По лемме~\ref{lem:outer-potential} на каждой из них
+\[
+ \Phi-\Phi^+\ge\frac{9r^2}{128\alpha^2}
+ \ge\frac9{32}R^2\left(\frac rR\right)^{2/3},
+ \qquad \alpha\le\frac12\left(\frac rR\right)^{2/3}.
+\]
+Так как $0\le\Phi\le R^2$, имеем $n_U\le\frac{32}{9}(R/r)^{2/3}$.
+Каждая такая итерация увеличивает $h$ не более чем в четыре раза.
+Итерация с $\beta=0$ и $\lambda>\lambda_\downarrow(\mathcal A)$
+уменьшает $h$ не менее чем вдвое, а при
+$\lambda=\lambda_\downarrow(\mathcal A)$ не увеличивает его. Из
+$h\ge\lambda_\downarrow(\mathcal A)/2\ge\varepsilon/(16rR)$
+следует, что число $n_D$ итераций с $\beta=0$ и
+$\lambda>\lambda_\downarrow(\mathcal A)$ удовлетворяет
+\[
+ h\,2^{n_D}\le\lambda_{\uparrow}4^{n_U},\qquad
+ n_D\le2n_U+\log_2\frac{16rR\lambda_{\uparrow}}\varepsilon.
+\]
+
+\item Рассмотрим оставшиеся итерации с $\beta=0$ и
+$\lambda=\lambda_\downarrow(\mathcal A)$.
+На них $\mathcal A^+=\mathcal A+a_\lambda$.
+Если максимум в~\eqref{eq:outer-parameters} достигается на первом члене,
+то $\alpha=\frac12(r/R)^{2/3}$ и
+\[
+ \log\frac{\mathcal A^+}{\mathcal A}
+ =-\log(1-\alpha)\ge\alpha=\frac12(r/R)^{2/3}.
+\]
+Поскольку $\mathcal A_0=R^2/(2\Delta)$, а до остановки
+$\mathcal A<2R^2/\varepsilon$, суммарный рост $\log\mathcal A$
+меньше $\log(4\Delta/\varepsilon)$. Поэтому таких итераций не больше
+$2(R/r)^{2/3}\log(4\Delta/\varepsilon)$.
+
+\item Если максимум достигается на втором члене, то
+\[
+ \lambda=\frac1n\left(\frac32L_0+2L_1^2\delta
+                       +\frac{2L_1^2R^2}{\mathcal A}\right).
+\]
+Если $\frac32L_0+2L_1^2\delta\ge2L_1^2R^2/\mathcal A$, то
+$\lambda\le(3L_0+4L_1^2\delta)/n$.
+Из $a_\lambda\ge\sqrt{\mathcal A/\lambda}$ и
+$\mathcal A^+\le2\mathcal A$ получаем
+\[
+ \begin{aligned}
+ \sqrt{\mathcal A^+}-\sqrt{\mathcal A}
+ &=\frac{a_\lambda}{\sqrt{\mathcal A+a_\lambda}+\sqrt{\mathcal A}}\\
+ &\ge\frac1{(1+\sqrt2)\sqrt\lambda}
+ \ge\frac{\sqrt n}{(1+\sqrt2)\sqrt{3L_0+4L_1^2\delta}}.
+ \end{aligned}
+\]
+Так как $\sqrt{\mathcal A}<\sqrt{2R^2/\varepsilon}$, число этих итераций
+не превосходит
+\[
+ (1+\sqrt2)\sqrt{\frac{2(3L_0+4L_1^2\delta)R^2}{n\varepsilon}}.
+\]
+В противоположном случае $\lambda\mathcal A<4(L_1R)^2/n$.
+Так как $\alpha\le1/2$, имеем
+\[
+ \alpha^2=\frac{1-\alpha}{\lambda\mathcal A}
+ \ge\frac n{8(L_1R)^2},\qquad
+ \log\frac{\mathcal A^+}{\mathcal A}\ge\alpha
+ \ge\frac{\sqrt n}{2\sqrt2\,L_1R}.
+\]
+Поэтому число таких итераций есть
+$O((L_1R/\sqrt n)\log(\Delta/\varepsilon))$.
+
+\item Если максимум достигается на последнем члене, то есть
+$\lambda=\varepsilon/(8rR)$, то метод останавливается
+по лемме~\ref{lem:outer-potential}.
+Если несколько членов равны, итерацию относим к любому из них.
+\end{itemize}
+Суммируя полученные оценки и учитывая последнюю итерацию, получаем~\eqref{eq:outer-budget}.
+Каждый вызов решателя почти наверное завершается за конечное число шагов,
+а каждый эвристический блок конечен по определению
+(раздел~\ref{sec:heuristic-block}).
+Следовательно, метод
+почти наверное останавливается.
+\end{proof}
+
+\subsection{Число запросов эвристики}\label{app:budget-proof}
+
+\begin{proof}[Доказательство теоремы~\ref{thm:adaptive-cheap-budget}\proofup{thm:adaptive-cheap-budget}]
+\leavevmode
+\begin{itemize}
+\item
+В начальный момент $G=H=0$. Из неравенства $H\le B_0+\omega G$ следует
+неотрицательность числа разрешённых запросов в~\eqref{eq:adaptive-cheap-budget}.
+Один блок расходует не больше $B_0+\omega G-H$ запросов, поэтому после блока
+неравенство сохраняется. За основную итерацию увеличивается только $G$,
+так что неравенство также сохраняется. Лимит каждого блока не больше $B_0$, что
+доказывает вторую оценку $H\le kB_0$.
+
+\item
+Блоки с лимитом $B_k\le B_0$ удовлетворяют требованиям
+раздела~\ref{sec:heuristic-block},
+поэтому к ним применимы леммы~\ref{lem:outer-potential}
+и~\ref{lem:outer-count}.
+Все условные оценки основных итераций и оценка числа обращений к оракулу
+в каждом эвристическом блоке остаются верными. Следовательно, оценка
+теоремы~\ref{thm:cheap-upper} сохраняется. Наконец, при каждом запуске
+\[
+ T=G+H\by{\le}{(a)}
+ B_0+(1+\omega)G,
+\]
+где (a) следует из~\eqref{eq:budget-prefix-invariant}.
+Переходя к математическому ожиданию, получаем~\eqref{eq:adaptive-budget-total}.
+\end{itemize}
+\end{proof}

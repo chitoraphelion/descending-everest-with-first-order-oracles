@@ -1,0 +1,933 @@
+\section{Конструкции для нижней оценки}\label{app:lower-proofs}
+
+Всюду ниже считаем выполненными предположения~\ref{asm:components}--\ref{asm:accuracy}.
+
+\subsection{Переход к рандомизированным методам}
+
+\begin{lemma}[усреднение по конечному семейству]\label{lem:lower-finite}
+Пусть $\mathcal F$ --- непустое конечное семейство допустимых входов,
+а $c_\tau>0$ и $c_{\mathcal E}\ge0$ --- весовые коэффициенты.
+Обозначим через $\tau_F$ число обращений алгоритма к оракулу на входе $F$,
+а через $\mathcal E_F$ --- невязку его ответа на этом входе,
+то есть $f_F(\hat x_F)-f_F^\ast$.
+Если для каждого детерминированного алгоритма
+\[
+ \frac1{|\mathcal F|}\sum_{F\in\mathcal F}
+ \bigl(c_\tau\tau_F+c_{\mathcal E}\mathcal E_F\bigr)\ge c,
+\]
+то $\mathcal T^\ast\ge(c-c_{\mathcal E}\varepsilon)/c_\tau$.
+Входы в семействе могут повторяться: сумма берётся по конечному множеству
+параметров с равными весами.
+\end{lemma}
+
+\begin{proof}[Доказательство леммы~\ref{lem:lower-finite}]
+Если зафиксировать все используемые алгоритмом случайные величины,
+он становится детерминированным. Измеримость правил выбора запросов
+в принятой модели оракула позволяет усреднить оценку
+по случайным величинам алгоритма.
+Пусть $\mathsf M$ --- корректный алгоритм (то есть его ожидаемая
+невязка на каждом входе не превосходит $\varepsilon$) и $\mathcal T(\mathsf M)<+\infty$.
+Тогда
+\[
+ c \by{\le}{(a)}
+ \mathbb E\!\left[
+ \frac1{|\mathcal F|}\sum_{F\in\mathcal F}
+ (c_\tau\tau_F+c_{\mathcal E}\mathcal E_F)\right] =
+ \frac1{|\mathcal F|}\sum_{F\in\mathcal F}
+ \bigl(c_\tau\mathbb E\tau_F+
+ c_{\mathcal E}\mathbb E\mathcal E_F\bigr) \by{\le}{(b)}
+ c_\tau\mathcal T(\mathsf M)+c_{\mathcal E}\varepsilon.
+\]
+Здесь неравенство (a) следует из условия леммы, применённого при любых значениях случайных величин алгоритма,
+а в (b) использованы неравенства $\mathbb E\tau_F\le\mathcal T(\mathsf M)$
+и $\mathbb E\mathcal E_F\le\varepsilon$.
+Значит, $\mathcal T(\mathsf M)\ge(c-c_{\mathcal E}\varepsilon)/c_\tau$;
+при $\mathcal T(\mathsf M)=+\infty$ это неравенство очевидно.
+Переходя к инфимуму по корректным алгоритмам, получаем утверждение
+для $\mathcal T^\ast$. Это вариант принципа Яо~\citep{yao1977} для конечного семейства.
+\end{proof}
+
+Пусть $c:\{1,\ldots,s\}\to\{1,\ldots,d\}$ выбрано равномерно,
+а координата $0$ в $\R^{d+1}$ выделена. Раскрытие координат и ответы оракула
+зависят только от текущего запроса и уже раскрытых значений,
+а запросы и возвращённая точка --- от истории ответов.
+При оценке вероятности раскрытия координат учитываем также
+возвращённую точку; число запросов при этом не увеличивается.
+
+\Needspace{14\baselineskip}
+\begin{lemma}[усреднение по скрытой координате]\label{lem:lower-resample}
+Пусть $\alpha,L>0$, а $N_{\rm qry}\ge1$ --- произвольное целое число.
+Доля отображений $c$, для которых
+среди первых $N_{\rm qry}$ точек запроса и точки, возвращённой
+до этого срока, найдётся точка $x$ с
+$\|x\|\le L$ и $|x_{c(j)}|\ge\alpha$ для некоторой
+ещё не раскрытой координаты $c(j)$, не превосходит
+$(N_{\rm qry}+1)sL^2/(d\alpha^2)$. С учётом неинъективных отображений доля
+исключений не превосходит
+\begin{equation}\label{eq:lower-pbad}
+ \frac{s^2+(N_{\rm qry}+1)sL^2/\alpha^2}{d}.
+\end{equation}
+\end{lemma}
+
+Оценка~\eqref{eq:lower-pbad} относится к равномерному распределению
+на множестве всех отображений, а не к условному распределению инъекций.
+Каждому неинъективному отображению приписываем вход, соответствующий
+одной фиксированной инъекции. Таким образом, каждый вход конечного
+распределения допустим. На исключениях используется лишь неотрицательность
+числа запросов и невязки; никаких свойств недопустимой конструкции там
+не требуется. Размерность выбирается после $N_{\rm qry},L,\alpha$, но до выбора
+алгоритма. Поэтому одна и та же размерность обеспечивает нужную оценку
+для любого алгоритма и любых значений используемых им случайных величин.
+
+\begin{proof}[Доказательство леммы~\ref{lem:lower-resample}]
+Зафиксируем позицию $j$ и все значения $c$, кроме $c(j)$. До раскрытия
+$j$ все соответствующие запуски имеют одну и ту же историю: это проверяется индукцией по времени,
+поскольку ответы до раскрытия не зависят от $c(j)$. Поэтому на любом
+шаге до раскрытия точка запроса или возвращённая точка одна и та же для всех $d$ значений
+$c(j)$. Если её норма не больше $L$, то
+\[
+ \alpha^2\#\{v:|x_v|\ge\alpha\}
+ \le\sum_{v:|x_v|\ge\alpha}|x_v|^2
+ \le\|x\|^2\le L^2.
+\]
+Доля значений $c(j)$, для которых $|x_{c(j)}|\ge\alpha$, не больше $L^2/(d\alpha^2)$.
+Остаётся усреднить по значениям на остальных позициях и просуммировать по $s$ позициям и
+$N_{\rm qry}+1$ точкам. Вероятность того, что $c$ принимает одинаковые значения на двух различных позициях,
+не больше $\binom{s}{2}/d\le s^2/d$.
+\end{proof}
+
+\begin{lemma}[нижняя оценка по числу раскрытых звеньев]\label{lem:lower-revelations}
+Пусть для конечного распределения допустимых входов задан идеальный процесс
+раскрытия $s$ звеньев. Для любого детерминированного алгоритма
+и любого срока $N_{\rm qry}$ обозначим через $Q$ число запросов
+в этом процессе до остановки или до указанного срока, а через $P$ ---
+число раскрытых звеньев. Предположим, что
+$\E Q\ge c_\tau\E P$ при некотором $c_\tau>0$.
+
+Пусть, кроме того, вне исключительного множества реальные и идеальные истории совпадают,
+а невязка возвращённой до этого срока точки не меньше $A-BP$, где
+\[
+ A\ge7\varepsilon/4,\qquad B>0,\qquad sB\ge A.
+\]
+Если доля исключений ограничена величиной~\eqref{eq:lower-pbad}
+с фиксированными $L,\alpha>0$, не зависящими от алгоритма и размерности,
+то в некоторой конечной размерности
+\[
+ \mathcal T^\ast\ge\frac{c_\tau A}{4B}.
+\]
+\end{lemma}
+
+\begin{proof}
+Положим $N_{\rm qry}=\lceil16Ac_\tau/B\rceil$,
+$q=BN_{\rm qry}/(Ac_\tau)\ge16$ и
+\[
+ Z=\frac{BQ}{Ac_\tau}+1-\frac BA P.
+\]
+По предположению $\E Z\ge1$, а из $Q\le N_{\rm qry}$ следует $Z\le q+1$.
+По~\eqref{eq:lower-pbad} выбор
+\[
+ d\ge16q\bigl(s^2+(N_{\rm qry}+1)sL^2/\alpha^2\bigr)
+\]
+обеспечивает $q\Pr(\mathrm{bad})\le1/16$ одновременно для всех алгоритмов.
+
+Пусть $\tau$ --- фактическое число запросов, $\mathcal E$ --- невязка.
+Вне исключений при $\tau<N_{\rm qry}$ имеем $Q\le\tau$
+и $\mathcal E\ge\max\{0,A-BP\}$; при $\tau\ge N_{\rm qry}$
+используем $Z\le q+1$. Во всех случаях
+\[
+ \frac{B\tau}{Ac_\tau}+\frac{\mathcal E}{A}
+ \ge\frac{q}{q+1}Z-q\mathbf1_{\mathrm{bad}}.
+\]
+Действительно, при $Z<0$ достаточно неотрицательности левой части,
+а на исключениях правая часть неположительна.
+Усредняя по входам и по случайным величинам корректного алгоритма,
+как в лемме~\ref{lem:lower-finite}, получаем
+\[
+ \frac{B\mathcal T(\mathsf M)}{Ac_\tau}
+ \ge\frac{q}{q+1}-\frac1{16}-\frac\varepsilon A
+ \ge\frac{16}{17}-\frac1{16}-\frac47>\frac14.
+\]
+Остаётся перейти к инфимуму по корректным алгоритмам.
+\end{proof}
+
+\subsection{Построение цепочки}
+
+Определим симметричную $C^1$-ступеньку
+\[
+ h(t)=\begin{cases}
+ 0,&t\le0,\\
+ 3t^2-2t^3,&0\le t\le1,\\
+ 1,&t\ge1.
+ \end{cases}
+\]
+Она принадлежит $C^1$, не убывает и удовлетворяет $h(1-t)=1-h(t)$.
+На $[0,1]$ имеем $h'(t)=6t(1-t)$, поэтому $0\le h'\le M=3/2$.
+Положим
+\begin{equation}\label{eq:lower-profile}
+ \begin{aligned}
+ &p(t)=h(4|t|-1)\bigl(1-h(|t|-2)\bigr),\\
+ &\widehat\psi'(t)=\int_0^t p(u)\,du,\\
+ &\widehat\psi(t)=\int_0^t\widehat\psi'(u)\,du,\\
+ &G_H=\widehat\psi'(1),\\
+ &c_H=G_H-\widehat\psi(1).
+ \end{aligned}
+\end{equation}
+На $[1/4,1/2]$ подстановка $u=4t-1$ и интегрирование многочлена $h$
+дают
+\begin{equation}\label{eq:lower-profile-numbers}
+ G_H=\frac58,\qquad \widehat\psi(1)=\frac{63}{320},\qquad
+ c_H=\frac{137}{320}.
+\end{equation}
+Функция $p$ чётна, $0\le p\le1$, равна нулю при $|t|\le1/4$
+и $|t|\ge3$, а на $[1/2,2]$ равна единице.
+Следовательно, функция $\widehat\psi$ принадлежит $C^2$, выпукла, неотрицательна, равна нулю
+на $[-1/4,1/4]$ и удовлетворяет оценкам
+\begin{equation}
+\label{eq:lower-profile-bounds}
+ \begin{gathered}
+ |\widehat\psi'|\le3,\\
+ 0\le\widehat\psi''\le1,\\
+ \widehat\psi(v)\ge\tfrac32(v-2).
+ \end{gathered}
+\end{equation}
+Последняя оценка при $v\ge2$ следует из касательной в точке $2$:
+\[
+ \widehat\psi'(2)\ge\int_{1/2}^2p=3/2.
+\]
+Для произвольных $c_{\psi},\sigma>0$ рассмотрим семейство одномерных функций
+\[
+ \psi(u)=c_{\psi}\widehat\psi(u/\sigma).
+\]
+Параметры $c_{\psi}$ и $\sigma$ будут выбраны отдельно для каждого семейства.
+
+При $w>0$ для точного сглаживания максимума зададим
+\begin{gather*}
+ S_w'(u)=2h\bigl((u+w)/(2w)\bigr)-1,\\
+ S_w(u)=w-\int_0^w S_w'(v)\,dv+\int_0^u S_w'(v)\,dv,\\
+ \operatorname{smax}_w(a,b)=(a+b)/2+S_w((a-b)/2).
+\end{gather*}
+Из симметрии $h$ следует чётность $S_w$; кроме того, $S_w(w)=w$.
+Из $|S_w'|\le1$ и $0\le S_w''\le M/w$ следует
+$S_w\ge|\cdot|$, причём равенство достигается при $|u|\ge w$.
+Поэтому функция $\operatorname{smax}_w$ принадлежит $C^2$, выпукла, не убывает по каждому
+аргументу, не меньше максимума своих аргументов и совпадает с ним при
+$|a-b|\ge2w$. Для выпуклых $C^2$-функций $a(x),b(x)$
+\begin{equation}\label{eq:lower-smax-hessian}
+ \begin{aligned}
+ &\nabla\operatorname{smax}_w(a,b)=\frac{\nabla a+\nabla b}{2}
+ +\frac12S_w'((a-b)/2)(\nabla a-\nabla b),\\
+ &\|\nabla^2\operatorname{smax}_w(a,b)\|\le\|\nabla^2a\|+\|\nabla^2b\|
+ +\frac{M}{4w}\|\nabla a-\nabla b\|^2.
+ \end{aligned}
+\end{equation}
+Формулы получаются двукратным дифференцированием; дополнительное слагаемое
+в гессиане равно
+$\frac14S_w''((a-b)/2)(\nabla a-\nabla b)(\nabla a-\nabla b)^\top$.
+
+Для произвольного целого $T\ge1$ положим $y_j=x_{c(j)}$ при $j<T$
+и $y_T=0$. Определим цепочку
+\begin{equation}
+\label{eq:lower-chain}
+ C(x)=-\frac{c_{\psi}G_H}{\sigma}y_0+\sum_{j=0}^{T-1}\psi(y_j-y_{j+1}).
+\end{equation}
+Выпуклость функции $\psi$ и касательная в $\sigma$ дают для $0\le p\le T$
+\begin{equation}\label{eq:lower-fenchel}
+ C(x) \by{\ge}{(a)}
+ -\frac{c_{\psi}G_H}{\sigma}y_0+\sum_{j=0}^{p-1}
+ \Bigl(\frac{c_{\psi}G_H}{\sigma}(y_j-y_{j+1})-c_{\psi}c_H\Bigr) \by{=}{(b)}-\frac{c_{\psi}G_H}{\sigma}y_p-pc_{\psi}c_H.
+\end{equation}
+Здесь в (a) использована касательная к функции $\psi$ в точке $\sigma$, а в (b) учтено сокращение соседних слагаемых.
+
+При $p=T$ получаем $C\ge-Tc_{\psi}c_H$, причём равенство достигается
+при $y_j=(T-j)\sigma$. Для инъективного $c$ оператор
+$y\mapsto(y_j-y_{j+1})_{j<T}$ имеет норму не больше $2$:
+\[
+ \sum_{j<T}(y_j-y_{j+1})^2
+ \le2\sum_{j<T}(y_j^2+y_{j+1}^2)
+ \le4\sum_{j<T}y_j^2.
+\]
+Отсюда для полной цепочки и для любой суммы её звеньев
+\begin{equation}
+\label{eq:lower-chain-bounds}
+ \begin{gathered}
+ \|\nabla C\|\le \frac{c_{\psi}}{\sigma}(G_H+6\sqrt T),\\
+ \|\nabla^2C\|\le\frac{4c_{\psi}}{\sigma^2}.
+ \end{gathered}
+\end{equation}
+Если $|y_j|<\alpha\le\sigma/8$ для всех $j\ge p$, то звенья
+с $j\ge p$ равны нулю в некоторой окрестности $x$.
+Поэтому значение и градиент цепочки в точке $x$ совпадают с ответом для функции
+\[
+ C^{[p]}(x)=-\frac{c_{\psi}G_H}{\sigma}y_0+\sum_{0\le j<\min(p,T)}\psi(y_j-y_{j+1}).
+\]
+Ответ для $C^{[p]}$ зависит лишь от координат с номерами не больше $p$;
+до запроса некоторые из них ещё могут быть скрыты, но после этого запроса
+раскрывается не более одной новой координаты.
+
+Чтобы обрабатывать удалённые запросы, введём радиальное продолжение.
+Оно не меняет функцию в шаре, содержащем её точку минимума,
+и скрывает координаты цепочки вне большего шара.
+
+\begin{lemma}[радиальное продолжение]\label{lem:lower-radial}
+Пусть $r,G,L_{\rm aux}>0$, а выпуклая $C^2$-функция $C$
+достигает минимума $C_\ast$ в $B(0,r)$ и удовлетворяет
+\[
+ \|\nabla C\|\le G,\qquad
+ \|\nabla^2C\|\le L_{\rm aux}/3,\qquad
+ 4G/r\le L_{\rm aux}/3.
+\]
+Положим
+\begin{equation}\label{eq:lower-mask-S}
+ \begin{aligned}
+ w&=\frac{27MG^2}{4L_{\rm aux}},\\
+ \rho(x)&=2G\sqrt{\|x\|^2+r^2}-4Gr+C_\ast-2w,\\
+ H(x)&=\operatorname{smax}_w(C(x),\rho(x)).
+ \end{aligned}
+\end{equation}
+Тогда $H$ выпукла, принадлежит $C^2$, совпадает с $C$ на $B(0,r)$,
+имеет тот же минимум и удовлетворяет
+\[
+ \|\nabla H\|\le2G,\qquad \|\nabla^2H\|\le L_{\rm aux}.
+\]
+При $\|x\|\ge4r+(C(0)-C_\ast+4w)/G$ имеем $H(x)=\rho(x)\ge C(0)$.
+\end{lemma}
+
+\begin{proof}
+На $B(0,r)$ выполнено $\rho\le C_\ast-2w\le C-2w$, поэтому $H=C$.
+Всюду $H\ge C\ge C_\ast$, поэтому минимум сохраняется.
+Для точек $x$ из последнего утверждения используем $C(x)\le C(0)+G\|x\|$:
+\[
+ \rho(x)\ge2G\|x\|-4Gr+C_\ast-2w
+ \ge C(0)+G\|x\|+2w\ge C(x)+2w.
+\]
+Значит, там $H=\rho\ge C(0)$.
+
+Имеем $\|\nabla\rho\|\le2G$ и $\|\nabla^2\rho\|\le2G/r$.
+Градиент $H$ --- выпуклая комбинация градиентов $C$ и $\rho$.
+По~\eqref{eq:lower-smax-hessian}
+\[
+ \|\nabla^2H\|\le\frac{L_{\rm aux}}3+\frac{2G}{r}
+ +\frac{9MG^2}{4w}\le L_{\rm aux}.
+\]
+\end{proof}
+
+Для цепочки~\eqref{eq:lower-chain} берём
+$G=c_\psi(G_H+6\sqrt T)/\sigma$ и $C_\ast=-Tc_\psi c_H$.
+Условия леммы~\ref{lem:lower-radial} принимают вид
+\begin{equation}\label{eq:lower-mask-conditions}
+ \frac{4c_\psi}{\sigma^2}\le\frac{L_{\rm aux}}3,
+ \qquad \frac{4c_\psi(G_H+6\sqrt T)}{\sigma r}\le\frac{L_{\rm aux}}3.
+\end{equation}
+Усечённые цепочки $C^{[p]}$ имеют ту же оценку градиента
+и равны нулю в начале координат. Продолжаем их с помощью
+той же функции $\rho$: вне указанного шара все ответы совпадают с $\rho$.
+Если полная и усечённая цепочки совпадают в окрестности точки,
+применение одного и того же сглаженного максимума сохраняет это свойство.
+Идея скрывать информацию от удалённых запросов с помощью радиального
+продолжения применяется в нижних оценках оракульной сложности~\citep{carmon2020lower}.
+
+\subsection{Поиск скрытой пары: член \texorpdfstring{$n$}{n}}
+
+Выберем различные индексы $a,b$ и знак $s\in\{-1,1\}$
+равномерно среди всех упорядоченных троек. В одномерном пространстве зададим
+\[
+ \begin{gathered}
+ f_a(u)=\frac{n\min\left\{\delta,\frac\Delta{\cosh(L_1R)-1}\right\}}{2}e^{L_1(u-sR)},\\
+ f_b(u)=\frac{n\min\left\{\delta,\frac\Delta{\cosh(L_1R)-1}\right\}}{2}e^{-L_1(u-sR)},\\
+ f_i=0\ (i\ne a,b).
+ \end{gathered}
+\]
+
+
+\begin{lemma}\label{lem:lower-pair}
+При предположении~\ref{asm:accuracy} выполнено
+$\mathcal T^\ast\ge(n+1)/9$.
+\end{lemma}
+
+\begin{proof}[Доказательство леммы~\ref{lem:lower-pair}]
+\leavevmode
+\begin{itemize}
+\item Компоненты скрытой пары удовлетворяют
+предположениям~\ref{asm:components} и~\ref{asm:smoothness}: они выпуклы,
+гладки, ограничены снизу и $|f_i''|=L_1|f_i'|$. Их среднее равно
+\[
+ f(u)=\min\left\{\delta,\frac\Delta{\cosh(L_1R)-1}\right\}\cosh(L_1(u-sR)),
+\]
+минимум достигается в $sR$, так что предположение~\ref{asm:minimizer} выполнено.
+Начальная невязка равна $\min\{\Delta,(\cosh(L_1R)-1)\delta\}\le\Delta$
+(предположение~\ref{asm:initial-gap}), а предположение~\ref{asm:heterogeneity}
+следует из
+\[
+ \begin{gathered}
+ f^\ast=\min\left\{\delta,\frac\Delta{\cosh(L_1R)-1}\right\},\\
+ f^\ast-n^{-1}\sum_i\inf f_i=\min\left\{\delta,\frac\Delta{\cosh(L_1R)-1}\right\}\le\delta.
+ \end{gathered}
+\]
+
+\item Зафиксируем алгоритм и проследим его запуск на нулевом входе.
+До первого запроса к $a$ или $b$ все ответы совпадают с ответами на нулевом входе.
+Если до остановки эта пара не затронута, возвращённая точка $u$ не зависит от $s$ и
+\begin{align*}
+ \frac12\sum_{s=\pm1}(f(u)-f^\ast)&=\min\left\{\delta,\frac\Delta{\cosh(L_1R)-1}\right\}\bigl(\cosh(L_1u)\cosh(L_1R)-1\bigr)
+ \\&\by{\ge}{(a)}\min\{\Delta,(\cosh(L_1R)-1)\delta\}.
+\end{align*}
+Здесь в (a) использовано неравенство $\cosh(L_1u)\ge1$.
+
+\item Пусть при запуске на нулевом входе просмотрено $r\le n-1$ различных
+индексов (после $n-1$ просмотренных индексов любая пара уже затронута).
+Повторные запросы лишь увеличивают число запросов.
+Вероятность затронуть пару равна
+\[
+ 1-\frac{(n-r)(n-r-1)}{n(n-1)}.
+\]
+Среднее число запросов до первого попадания или остановки не меньше
+\begin{align*}
+ \sum_{j=0}^{r-1}\frac{(n-j)(n-j-1)}{n(n-1)}
+ &=\frac{n(n^2-1)-(n-r)((n-r)^2-1)}{3n(n-1)},\\
+ \sum_{j=0}^{r-1}\frac{(n-j)(n-j-1)}{n(n-1)}
+ -\frac{n+1}{3}\left(1-\frac{(n-r)(n-r-1)}{n(n-1)}\right)
+ &=\frac{(n-r)(n-r-1)r}{3n(n-1)}\ge0.
+\end{align*}
+В первом равенстве использовано тождество
+$\sum_{u=1}^v u(u-1)=v(v^2-1)/3$.
+
+Если при запуске на нулевом входе алгоритм делает бесконечно много запросов, но обращается менее чем к $n-1$ различным
+индексам, то на некотором входе семейства число запросов бесконечно,
+и требуемая усреднённая оценка также выполнена. Обозначим число запросов на выбранном
+входе через $\tau$, а невязку ответа через $\mathcal E$. Тогда
+\[
+ \frac{\mathbb E_{a,b,s}\tau}{(n+1)/3}
+ +\frac{\mathbb E_{a,b,s}\mathcal E}{\min\{\Delta,(\cosh(L_1R)-1)\delta\}}\ge1.
+\]
+\item По лемме~\ref{lem:lower-finite}
+\[
+ \mathcal T^\ast\ge\frac{n+1}{3}\left(1-
+ \frac\varepsilon{\min\{\Delta,(\cosh(L_1R)-1)\delta\}}\right).
+\]
+Из $\cosh u-1\ge u^2/2$ и предположения~\ref{asm:accuracy}
+следует $(\cosh(L_1R)-1)\delta\ge3\varepsilon/2$.
+По предположению~\ref{asm:initial-gap}, $\Delta\ge2\varepsilon$,
+поэтому выражение в скобках не меньше $1/3$.
+Следовательно, $\mathcal T^\ast\ge(n+1)/9$.
+\end{itemize}
+\end{proof}
+
+\subsection{Семейство S: независимые гладкие цепочки}
+
+При условиях следующей леммы зададим $n$ цепочек~\eqref{eq:lower-chain}
+в непересекающихся координатах $c(i,j)$, $1\le i\le n$, $0\le j<T$, где
+\[
+ T=\left\lfloor\sqrt{\frac{c_HL_0R^2}{24n\varepsilon}}\right\rfloor,
+ \qquad c_\psi=\frac{2\varepsilon}{Tc_H},
+ \qquad \sigma=\sqrt{\frac{24\varepsilon}{Tc_HL_0}}.
+\]
+Положим $f_i=H_i$, где $H_i$ --- продолжение цепочки $C_i$ по лемме~\ref{lem:lower-radial}
+с радиусом $R$ и оценкой гессиана $L_0$.
+Точка общего минимума имеет координаты
+$x^\ast_{c(i,j)}=(T-j)\sigma$.
+
+После $q_i$ запросов к компоненте $i$ считаем раскрытыми
+$p_i=\min\{q_i,T\}$ позиций её цепочки. Следующий идеальный ответ
+задаётся продолжением $C_i^{[p_i]}$ и раскрывает не больше одной позиции.
+Для скрытых координат используем порог
+\[
+ \alpha=\sigma\min\{1/8,c_H/(8G_H)\}.
+\]
+Размерность выбираем по лемме~\ref{lem:lower-revelations} с $s=nT$.
+
+\begin{lemma}\label{lem:lower-S}
+Если
+\begin{equation}\label{eq:lower-S-regime}
+ \frac{L_0R^2}{\varepsilon}
+ \ge\frac{24(G_H+6)^2}{c_H}\,n,
+\end{equation}
+то
+\begin{equation}\label{eq:lower-S}
+ \mathcal T^\ast\gtrsim\sqrt{\frac{nL_0R^2}{\varepsilon}}.
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+Условие~\eqref{eq:lower-S-regime} обеспечивает $T\ge1$ и оставляет
+достаточный запас гладкости для радиального продолжения.
+Проверим предположение~\ref{asm:minimizer}:
+\[
+ \|x^\ast\|^2=n\sigma^2\sum_{j=1}^Tj^2
+ \le\frac{24n\varepsilon}{c_HL_0}T^2\le R^2.
+\]
+По~\eqref{eq:lower-chain-bounds} имеем
+\[
+ \|\nabla^2C_i\|\le\frac{4c_\psi}{\sigma^2}=\frac{L_0}{3},\qquad
+ G^2=\frac{L_0\varepsilon}{6c_H}
+       \left(\frac{G_H}{\sqrt T}+6\right)^2
+ \le\frac{L_0\varepsilon(G_H+6)^2}{6c_H}
+ \le\left(\frac{L_0R}{12}\right)^2.
+\]
+Последнее неравенство следует из~\eqref{eq:lower-S-regime}.
+Значит, $4G/R\le L_0/3$, и лемма~\ref{lem:lower-radial}
+даёт выпуклые ограниченные снизу $L_0$-гладкие компоненты,
+то есть выполнены предположения~\ref{asm:components} и~\ref{asm:smoothness}.
+Имеем $f(0)=0$, $f^\ast=-2\varepsilon$;
+начальная невязка равна $2\varepsilon\le\Delta$, неоднородность --- нулю.
+Тем самым выполнены предположения~\ref{asm:initial-gap} и~\ref{asm:heterogeneity}.
+
+Вне исключительного множества реальные и идеальные истории совпадают:
+для внутренних запросов это следует из наличия у $\psi$ плоского участка,
+для внешних --- из леммы~\ref{lem:lower-radial}.
+То же верно для возвращённой точки $\hat x$.
+Внутри шара продолжения по~\eqref{eq:lower-fenchel}
+\[
+ f_i(\hat x)\ge-\frac{2\varepsilon}{T}\left(p_i+\frac18\right).
+\]
+При $p_i=T$ достаточно $f_i\ge-2\varepsilon$.
+Поэтому при $P=\sum_i p_i$ невязка удовлетворяет
+\[
+ \mathcal E\ge2\varepsilon-\frac{\varepsilon}{4T}
+ -\frac{2\varepsilon}{nT}P
+ \ge\frac{7\varepsilon}{4}-\frac{2\varepsilon}{nT}P.
+\]
+Вне шара она не меньше $2\varepsilon$.
+Каждый запрос раскрывает не больше одного звена.
+Применяем лемму~\ref{lem:lower-revelations} с
+$c_\tau=1$, $A=7\varepsilon/4$, $B=2\varepsilon/(nT)$.
+Условие $sB\ge A$ выполнено, и
+\[
+ \mathcal T^\ast\ge\frac{7nT}{32}
+ \ge\frac7{64}\sqrt{\frac{c_HnL_0R^2}{24\varepsilon}}.
+\]
+Здесь использовано неравенство $\lfloor u\rfloor\ge u/2$ при $u\ge1$.
+\end{proof}
+
+\subsection{Семейство X: экспоненциальное преобразование цепочек}
+
+\begin{lemma}[экспоненциальное преобразование]\label{lem:lower-lift}
+Пусть функция $m\ge0$ выпукла, принадлежит $C^2$ и удовлетворяет
+$\|\nabla m\|\le L_1/7$, $\|\nabla^2m\|\le4L_1^2/49$.
+Тогда при $\delta'>0$ обе функции
+\[
+ v(x)=\delta'\bigl(e^{\pm2L_1x_0/7+m(x)}-1\bigr)
+\]
+выпуклы, принадлежат $C^2$, имеют инфимум $-\delta'$
+и удовлетворяют $\|\nabla^2v\|\le L_1\|\nabla v\|$.
+\end{lemma}
+
+\begin{proof}
+Положим $u=\pm2L_1x_0/7+m(x)$. Функция $m$ может зависеть от $x_0$.
+Имеем
+\begin{equation}\label{eq:lower-lift}
+ \begin{aligned}
+ L_1/7&\le\|\nabla u\|\le3L_1/7,\\
+ \|\nabla^2u\|+\|\nabla u\|^2
+ &\le\left(\frac{4L_1}{7}+\frac{3L_1}{7}\right)\|\nabla u\|
+ =L_1\|\nabla u\|,\\
+ \|\nabla^2v\|
+ &\le\delta'e^u\bigl(\|\nabla^2u\|+\|\nabla u\|^2\bigr)
+ \le L_1\|\nabla v\|.
+ \end{aligned}
+\end{equation}
+Выпуклость $v$ следует из выпуклости $u$.
+Вдоль $x=\mp te_0$ имеем $u(x)\le m(0)-L_1t/7\to-\infty$,
+поэтому $\inf v=-\delta'$.
+\end{proof}
+
+Таким образом, $v$ принадлежит требуемому классу при любом $L_0\ge0$.
+Проверка принадлежности классу через оценку гессиана соответствует характеризации
+из первой части~\citep[лемма~2.2]{rudomanov2026everest}.
+
+Положим
+\begin{equation}\label{eq:lower-X-parameters}
+ \begin{gathered}
+ \eta=\log\left(1+\frac{2\varepsilon}{\delta}\right),\qquad
+ \rho=\left(1+\frac{\delta}{2\varepsilon}\right)\eta,\\
+ D_\delta=\max\left\{\sqrt{\frac{12\eta}{c_H}},
+                   \frac{4(G_H+6)\eta}{c_H}\right\},
+ \qquad U=\frac{2L_1R}{7D_\delta}.
+ \end{gathered}
+\end{equation}
+Здесь $D_\delta\sim\max\{\sqrt\eta,\eta\}$.
+Сначала рассмотрим произвольные целые $g,T\ge1$ с $2g\le n$.
+Построим $g$ цепочек~\eqref{eq:lower-chain} в непересекающихся координатах
+$c(b,j)$, $1\le b\le g$, $0\le j<T$, с параметрами
+\[
+ c_\psi=\frac{\eta}{Tc_H},\qquad
+ \sigma=\frac7{2L_1}\max\left\{
+ \sqrt{\frac{12\eta}{Tc_H}},\frac{4(G_H+6\sqrt T)\eta}{Tc_H}\right\}.
+\]
+Обозначим через $\sigma_1$ значение $\sigma$ при $T=1$.
+Тогда $\sigma\le\sigma_1/\sqrt T$ и $U=R/\sigma_1$.
+Продолжаем каждую цепочку по лемме~\ref{lem:lower-radial}
+с радиусом $r_X=\max\{R,21/(2L_1)\}$ и оценкой гессиана $4L_1^2/49$.
+Полученные функции обозначим через $H_b$.
+Их общий минимум достигается в точке
+$x^\ast_{c(b,j)}=(T-j)\sigma$.
+
+Определим $2g$ активных компонент:
+\[
+ \begin{aligned}
+ m_b(x)&=\eta+H_b(x),\\
+ f_{b,\pm}(x)&=\frac{n\delta}{2g}
+ \bigl(e^{\pm2L_1x_0/7+m_b(x)}-1\bigr).
+ \end{aligned}
+\]
+Остальные компоненты равны нулю. Скрытые координаты отличны от $0$,
+поэтому $x^\ast_0=0$.
+
+Запрос к любой компоненте пары раскрывает не больше одного звена её цепочки.
+Для скрытых координат используем порог
+\[
+ \alpha=\sigma\min\{1/8,c_H/(8G_H\rho)\}.
+\]
+Размерность выбираем по лемме~\ref{lem:lower-revelations} с $s=gT$.
+При $U\ge1$ берём
+\[
+ g=\min\{\lfloor n/2\rfloor,\lfloor U^2\rfloor\},
+ \qquad T=\lfloor U/\sqrt g\rfloor.
+\]
+Оба числа положительны, и $2g\le n$.
+
+\begin{lemma}\label{lem:lower-X}
+Если $U\ge1$, то
+\begin{equation}\label{eq:lower-X}
+ \mathcal T^\ast\gtrsim
+ \frac{U\min\{\sqrt n,U\}}{\rho}.
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+Из выбора $\sigma$ и~\eqref{eq:lower-chain-bounds} получаем
+\[
+ \|\nabla C_b\|\le L_1/14,\qquad
+ \|\nabla^2C_b\|\le4L_1^2/147.
+\]
+Вместе с $r_X\ge21/(2L_1)$ это означает, что условия
+леммы~\ref{lem:lower-radial} выполнены. Кроме того,
+\[
+ \|x^\ast\|^2=g\sigma^2\sum_{j=1}^Tj^2
+ \le g\sigma_1^2T^2\le R^2.
+\]
+Следовательно, $m_b\ge0$,
+$\|\nabla m_b\|\le L_1/7$ и $\|\nabla^2m_b\|\le4L_1^2/49$.
+По лемме~\ref{lem:lower-lift} выполнены предположения~\ref{asm:components}
+и~\ref{asm:smoothness}, причём
+\[
+ f(x)=\frac\delta g\sum_{b=1}^g
+ \bigl(\cosh(2L_1x_0/7)e^{m_b(x)}-1\bigr)\ge0.
+\]
+В точке $x^\ast$ все $m_b=0$, поэтому $f(x^\ast)=f^\ast=0$
+и выполнено предположение~\ref{asm:minimizer}.
+В нуле $m_b=\eta$, откуда $f(0)=2\varepsilon\le\Delta$
+(предположение~\ref{asm:initial-gap}).
+Поскольку $\inf f_{b,\pm}=-n\delta/(2g)$, неоднородность равна $\delta$
+(предположение~\ref{asm:heterogeneity}).
+
+Совпадение реальных и идеальных историй доказывается так же, как для семейства S:
+экспоненциальное преобразование сохраняет локальное равенство функций.
+Пусть $p_b\le T$ --- число раскрытых звеньев пары $b$ и $P=\sum_b p_b$.
+Внутри шара продолжения вне исключительного множества
+оценка~\eqref{eq:lower-fenchel} даёт
+\[
+ m_b(\hat x)\ge\eta\left(1-\frac{p_b}{T}\right)
+ -\frac{\eta}{8T\rho}.
+\]
+При $p_b=T$ достаточно $m_b\ge0$.
+Касательная к экспоненте в $\eta$ и равенство
+$e^\eta\eta\delta=2\varepsilon\rho$ дают
+\[
+ \frac{\mathcal E}{2\varepsilon}
+ \ge1-\frac{\rho}{gT}P-\frac1{8T}.
+\]
+Вне шара невязка не меньше $2\varepsilon$.
+Применяем лемму~\ref{lem:lower-revelations} с
+$c_\tau=1$, $A=7\varepsilon/4$, $B=2\varepsilon\rho/(gT)$.
+Неравенство $(1+1/z)\log(1+z)\ge1$ при $z>0$ даёт
+$\rho\ge1$, поэтому $sB\ge A$.
+Получаем $\mathcal T^\ast\ge7gT/(32\rho)$.
+Из $n\ge2$, $U\ge1$ и определения $g,T$ следует
+\[
+ g\ge\frac13\min\{n,U^2\},\qquad
+ T\ge\frac{U}{2\sqrt g},\qquad
+ gT\ge\frac{U\min\{\sqrt n,U\}}{2\sqrt3}.
+\]
+Из этих неравенств следует~\eqref{eq:lower-X}.
+\end{proof}
+
+\subsection{Число запросов при поиске звена}
+
+\begin{lemma}[число запросов для поиска звена]\label{lem:lower-search}
+Пусть $T$ звеньев размещены инъекцией
+$\pi:\{0,\ldots,T-1\}\to\{1,\ldots,m\}$, $T\le m$.
+На уровне $j$ идеальный ответ содержит лишь звенья с номерами
+не больше $j$, а уровень увеличивается на единицу только при запросе
+к паре $\pi(j)$. Пусть $Q_j$ --- число запросов на уровне
+$j$ до остановки или до момента $N_{\rm qry}$, а $R_j$ --- индикатор
+того, что этот уровень пройден к моменту $N_{\rm qry}$. Тогда для каждого
+фиксированного отображения координат
+\begin{equation}\label{eq:lower-search}
+ \mathbb E_\pi Q_j\ge\frac{m-T+2}{2}\mathbb E_\pi R_j.
+\end{equation}
+\end{lemma}
+
+\begin{proof}[Доказательство леммы~\ref{lem:lower-search}]
+\leavevmode
+\begin{itemize}
+\item Зафиксируем размещение всех звеньев, кроме $j$.
+Для размещения звена $j$ остаётся $m-T+1$ свободных пар.
+До уровня $j$ история не зависит от размещения этого звена.
+На самом уровне $j$ сравним её с виртуальной историей, в которой
+звено $j$ не помещено ни в одну пару. Запуски совпадают до первого
+запроса к выбранной свободной паре. Пусть в виртуальной истории
+до остановки или до момента $N_{\rm qry}$ запрашиваются $r$ различных свободных пар.
+\item Ровно $r$ вариантов размещения приводят к прохождению уровня;
+для $k$-го из них на данном уровне сделано не меньше $k$ запросов,
+а для каждого из $(m-T+1)-r$ остальных --- не меньше $r$.
+Поэтому
+\begin{align*}
+ \sum_{v=1}^{(m-T+1)}Q_j(v)&\by{\ge}{(a)}
+ \sum_{k=1}^r k+((m-T+1)-r)r =r\left((m-T+1)+\frac{1-r}{2}\right)
+ \\&\by{\ge}{(b)}
+ \frac{(m-T+1)+1}{2}\sum_{v=1}^{(m-T+1)}R_j(v).
+\end{align*}
+Здесь в (a) учтён порядок первого посещения свободных пар, а в (b) использованы соотношения $r\le (m-T+1),\;\sum_vR_j(v)=r$.
+
+\item Если уровень вообще не достигнут, обе правые величины равны нулю.
+Повторные запросы и запросы к занятым парам лишь увеличивают левую часть.
+Суммируя по всем фиксированным размещениям остальных звеньев,
+получаем~\eqref{eq:lower-search}. Это и есть усреднение по всем инъекциям:
+каждая из них входит ровно в один слой с весом $1/(m-T+1)$.
+\end{itemize}
+\end{proof}
+
+
+\subsection{Семейство Q: поиск пары со следующим звеном}
+
+Показатель $2/3$ уже возникал в первой части в нижней оценке для одной
+функции с ограниченной начальной невязкой
+\citep[теорема~B.3]{rudomanov2026everest}.
+Используемое здесь семейство Q задаётся экспонентами от вспомогательных функций
+и случайным размещением звеньев по парам компонент.
+
+Сначала построим семейство для произвольных целых $m,T\ge1$,
+таких что $2m\le n$, $T\le m/2$ и
+\[
+ \begin{gathered}
+ 2L_1R/7\ge3,\\
+ (2L_1R/7)^{2/3}\le T\le2(2L_1R/7)^{2/3},\\
+ 24\log\!\left(1+\frac{2\varepsilon m}{\delta}\right)\le\widehat\psi(1)(2L_1R/7)^{2/3}.
+ \end{gathered}
+\]
+Конкретные числа пар и звеньев зададим ниже.
+
+Определим вспомогательные функции:
+\[
+ \begin{aligned}
+ \Psi_0(u)&=\frac{\log\!\left(1+\frac{2\varepsilon m}{\delta}\right)}{\widehat\psi(1)}
+             \widehat\psi(u\sqrt T/R),\\
+ \Psi(u)&=\frac1{48}\widehat\psi(4L_1u/7).
+ \end{aligned}
+\]
+Звенья имеют вид $\Psi_0(R/\sqrt T-x_{c(0)})$ и
+$\Psi(x_{c(j-1)}-x_{c(j)})$, $1\le j<T$. Координаты $c(j)$ попарно различны и отличны от $0$.
+Звенья размещаются по $m$ парам с помощью равномерно выбранной инъекции $\pi$, так что каждая пара содержит
+не больше одного звена. Обозначим через $\Psi_b$ сумму звеньев пары $b$ и положим
+\[
+ \begin{aligned}
+ \rho(x)&=\frac{L_1}7\sqrt{\|x\|^2+R^2}-\frac{2L_1R}7-\frac{27M}{32},\\
+ m_b(x)&=\operatorname{smax}_{27M/64}(\Psi_b(x),\rho(x)).
+ \end{aligned}
+\]
+
+Зададим точку
+\[
+ x^\ast=\frac R{\sqrt T}\sum_{j<T}e_{c(j)}.
+\]
+
+Определим компоненты
+\[
+ f_{b,\pm}(x)=\frac{n\delta}{2m}
+ \left(e^{\pm2L_1x_0/7+m_b(x)}-1\right).
+\]
+Остальные компоненты равны нулю. 
+Определим функции
+\[
+ \begin{gathered}
+ \phi_0(u)=e^{\Psi_0(u)}-1,\\
+ \phi(u)=e^{\Psi(u)}-1.
+ \end{gathered}
+\]
+
+Идеальный оракул на уровне $p$ оставляет только звенья
+$j\le p$ и увеличивает уровень после запроса к паре $\pi(p)$.
+До запроса раскрыты координаты с номерами $j<p$, а после него раскрывается не больше одной новой координаты.
+Для скрытых координат используем порог
+\[
+ \min\left\{\frac7{32L_1},
+ \frac{\varepsilon m}{4\phi_0'(R/\sqrt T)\delta}\right\}.
+\]
+
+Для следующей леммы положим
+\[
+ t=(2L_1R/7)^{2/3},\qquad m=\lfloor n/2\rfloor,\qquad
+ T=\lceil t\rceil,\qquad \eta_m=\log(1+2\varepsilon m/\delta).
+\]
+
+\begin{lemma}\label{lem:lower-Q}
+Если
+\begin{equation}\label{eq:lower-Q-regime}
+ L_1R\ge\frac{21}{2},\qquad 4t\le m,\qquad
+ 24\eta_m\le\widehat\psi(1)t,
+\end{equation}
+то
+\begin{equation}\label{eq:lower-Q}
+ \mathcal T^\ast\gtrsim
+ \frac{n(L_1R)^{2/3}}{(1+\eta_m)^2}.
+\end{equation}
+\end{lemma}
+
+\begin{proof}[Доказательство леммы~\ref{lem:lower-Q}]
+Первое условие~\eqref{eq:lower-Q-regime} позволяет продолжить звенья
+за пределы шара $B(0,R)$. Второе даёт $t\le T\le2t\le m/2$:
+при поиске очередного звена свободными остаются не меньше половины пар.
+Третье ограничивает кривизну первого звена.
+\begin{itemize}
+\item Для обычного звена из~\eqref{eq:lower-profile-bounds} следуют оценки
+$L_1/14$ для нормы градиента и $4L_1^2/147$ для нормы гессиана.
+Для первого звена те же оценки следуют из
+\[
+ \begin{aligned}
+ \frac{3\sqrt T\,\eta_m}{\widehat\psi(1)R}
+ &\le\frac{6\sqrt t\,\eta_m}{\widehat\psi(1)R}
+ \le\frac{t^{3/2}}{4R}=\frac{L_1}{14},\\
+ \frac{T\eta_m}{\widehat\psi(1)R^2}
+ &\le\frac{t^2}{12R^2}\le\frac{4L_1^2}{147}.
+ \end{aligned}
+\]
+При $2L_1R/7\ge3$ применима лемма~\ref{lem:lower-radial}
+с $G=L_1/14$, $L_{\rm aux}=4L_1^2/49$, $r=R$, $C_\ast=0$.
+Поэтому
+\[
+ \begin{gathered}
+ \|\nabla m_b\|\le L_1/7,\\
+ \|\nabla^2m_b\|\le4L_1^2/49.
+ \end{gathered}
+\]
+Все потенциалы неотрицательны. Точка $x^\ast$ имеет норму $R$,
+и в ней все звенья и потенциалы равны нулю.
+В нуле отличен от нуля лишь потенциал пары, содержащей звено $0$; он равен
+ $\eta_m$.
+Как и для семейства X, минимум средней функции равен
+нулю, неоднородность равна $\delta$, а
+\[
+ f(0)=2\varepsilon\le\Delta.
+\]
+Тем самым выполнены предположения~\ref{asm:minimizer}--\ref{asm:heterogeneity}.
+Предположения~\ref{asm:components} и~\ref{asm:smoothness}
+следуют из леммы~\ref{lem:lower-lift}.
+
+\item Докажем нижнюю оценку невязки. Имеем
+\[
+ \begin{aligned}
+ \phi_0(R/\sqrt T)&=e^{\eta_m}-1=\frac{2\varepsilon m}{\delta},\\
+ \phi_0'(R/\sqrt T)&=
+ \frac{G_H\sqrt T}{R\widehat\psi(1)}e^{\eta_m}\eta_m.
+ \end{aligned}
+\]
+Обозначим $s_0=\phi_0'(R/\sqrt T)>0$,
+$\log_+u=\max\{0,\log u\}$ и
+\[
+ J=1+16\log_+(56s_0/L_1),\qquad K=\frac{7s_0}{2L_1}J.
+\]
+Величина $K$ ограничивает потерю в нижней оценке при добавлении одного звена:
+\begin{equation}\label{eq:lower-conjugate}
+ \sup_{u\in\mathbb R}\{s_0u-\phi(u)\}\le K.
+\end{equation}
+При $u\le7/(2L_1)$ достаточно $\phi\ge0$.
+При $u>7/(2L_1)$ положим $v=4L_1u/7-2>0$.
+По~\eqref{eq:lower-profile-bounds}, $\Psi(u)\ge v/32$.
+Для произвольных $\mu\ge0$, $a>0$, $v\ge0$ касательная к экспоненте в
+$\log(\mu/a)$ при $\mu>a$ и $e^{av}\ge1+av$ при $\mu\le a$ дают
+\[
+ \mu v-(e^{av}-1)\le\frac\mu a\max\{0,\log(\mu/a)\}.
+\]
+Подставляя $\mu=7s_0/(4L_1)$ и $a=1/32$, получаем
+\[
+ s_0u-\phi(u)
+ \le\frac{7s_0}{2L_1}
+     +\frac{56s_0}{L_1}\log_+(56s_0/L_1)=K.
+\]
+
+Если раскрыты первые $p<T$ координат и модуль следующей координаты
+меньше выбранного порога, то сумма разностей
+$R/\sqrt T-x_{c(0)}$ и $x_{c(j-1)}-x_{c(j)}$, $1\le j\le p$,
+равна $R/\sqrt T-x_{c(p)}$.
+Касательная к $\phi_0$ и~\eqref{eq:lower-conjugate} дают
+\begin{equation}\label{eq:lower-Q-gap}
+ \begin{aligned}
+ &\phi_0(R/\sqrt T-x_{c(0)})+\sum_{j=1}^p\phi(x_{c(j-1)}-x_{c(j)})\\
+ &\quad\ge\frac{2\varepsilon m}{\delta}-s_0x_{c(p)}-pK.
+ \end{aligned}
+\end{equation}
+Инъективность $\pi$ позволяет оценить среднюю функцию снизу суммой
+этих экспоненциальных звеньев: пустая пара даёт неотрицательный вклад,
+а пара со звеном $j$ даёт не меньше $(\delta/m)\phi(x_{c(j-1)}-x_{c(j)})$.
+
+\item Порог для скрытых координат, выбранный в построении Q,
+не превосходит $7/(32L_1)$, поэтому
+удалённые звенья равны нулю в окрестности точки запроса.
+При
+\[
+ \|x\|\ge4R+\frac{14}{L_1}\log\!\left(1+\frac{2\varepsilon m}{\delta}\right)+\frac{189M}{8L_1},
+\]
+по лемме~\ref{lem:lower-radial} полные и усечённые компоненты определяются только радиальным продолжением
+и координатой $x_0$. Все потенциалы не меньше $\log\!\left(1+\frac{2\varepsilon m}{\delta}\right)$, а невязка
+не меньше начальной. Таким образом, истории совпадают
+и для произвольных удалённых запросов.
+По~\eqref{eq:lower-Q-gap} и выбору порога невязка после
+прохождения $p$ уровней не меньше $A-Bp$, где можно взять
+\[
+ A=7\varepsilon/4,\qquad
+ B=\frac{K\delta}{m}=\frac{7s_0\delta}{2mL_1}J.
+\]
+Действительно, после умножения на $\delta/m$ слагаемое со скрытой координатой
+в~\eqref{eq:lower-Q-gap} даёт потерю не больше $\varepsilon/4$.
+Для применения леммы~\ref{lem:lower-revelations} проверим два соотношения.
+Из
+\[
+ s_0=\frac{G_H}{\widehat\psi(1)}\frac{\sqrt T}{R}e^{\eta_m}\eta_m,
+ \qquad \frac{\delta}{m}=\frac{2\varepsilon}{e^{\eta_m}-1}
+\]
+и $\sqrt T\le2\sqrt t$ следует
+\begin{equation}\label{eq:lower-Q-ratio}
+ \frac AB
+ =\frac{\widehat\psi(1)}{4G_H}
+   \frac{L_1R}{\sqrt T}\frac{1-e^{-\eta_m}}{\eta_m J}
+ \ge\frac{7\widehat\psi(1)}{16G_H}
+      \frac{t}{(1+\eta_m)J}.
+\end{equation}
+Здесь использованы равенство $L_1R=7t^{3/2}/2$ и неравенство
+$1-e^{-u}\ge u/(1+u)$ при $u\ge0$.
+Кроме того, $T^{3/2}\ge2L_1R/7$, $J\ge1$ и
+$G_H/\widehat\psi(1)\ge1$ дают
+\[
+ TB=\frac{7\delta}{2mL_1}\frac{G_H}{\widehat\psi(1)}
+       \frac{T^{3/2}}R e^{\eta_m}\eta_m J
+ \ge\frac\delta m e^{\eta_m}\eta_m
+ \ge2\varepsilon>A.
+\]
+При $p=T$ оценка невязки следует из $f\ge0$.
+
+\item Суммируя~\eqref{eq:lower-search} по уровням, получаем
+$\E Q\ge c_\tau\E P$ с $c_\tau=(m-T+2)/2\ge m/4$.
+Лемма~\ref{lem:lower-revelations} при $s=T$ даёт
+$\mathcal T^\ast\ge mA/(16B)$.
+Остаётся оценить $J$. По третьему условию~\eqref{eq:lower-Q-regime}
+\[
+ \frac{56s_0}{L_1}
+ \le\frac{32G_H}{\widehat\psi(1)}\frac{e^{\eta_m}\eta_m}{t}
+ \le\frac{4G_H}{3}e^{\eta_m}
+ =\frac56e^{\eta_m}.
+\]
+Следовательно, $J\le1+16\eta_m$. Подставляя эту оценку
+в~\eqref{eq:lower-Q-ratio} и используя $m\ge n/3$ и
+$t=(2/7)^{2/3}(L_1R)^{2/3}$, получаем~\eqref{eq:lower-Q}.
+\end{itemize}
+\end{proof}

@@ -1,0 +1,45 @@
+\begin{tikzpicture}[
+ x=1mm,y=1mm,font=\small,
+ box/.style={draw=optimBlue!65,fill=optimBlue!5!white,rounded corners=2pt,
+ line width=.55pt,align=center,inner sep=5pt},
+ arr/.style={-{Stealth[length=2mm]},line width=.65pt,draw=optimBlue},
+ lab/.style={font=\footnotesize,fill=white,inner sep=2pt,align=center}]
+\node[box,text width=108mm] (fast) at (0,0) {
+ \textbf{1. Блок с эвристикой}\\[2pt]
+ Предлагает точки, опираясь на историю предыдущих запросов.\\
+ Принимаются лишь точки, не ухудшающие значение функции.\\
+ Число обращений к оракулу в блоке ограничено.};
+\node[box,text width=85mm] (cert) at (0,-27) {
+ \textbf{2. Проверка точности}\\[2pt]
+ Зазор между лучшим значением функции\\
+ и нижней оценкой её минимума достаточно мал?};
+\node[box,text width=20mm] (answer) at (66,-27) {Вернуть\\точку};
+\node[box,text width=94mm] (gate) at (0,-52) {
+ \textbf{3. Основная итерация}\\[2pt]
+ Вычислить градиенты компонент и оценку кривизны.\\
+ Достаточно ли мала кривизна для локального решения?};
+\node[box,text width=61mm,anchor=north] (cut) at (-35,-74) {
+ \textbf{Построить отсечение}\\[3pt]
+ Большая кривизна даёт нижнюю\\
+ оценку невязки. Выпуклость задаёт\\
+ полупространство с точкой минимума.\\
+ Проекция приближает к этой точке\\
+ вспомогательную точку.};
+\node[box,text width=61mm,anchor=north] (local) at (35,-74) {
+ \textbf{Выполнить ускоренный шаг}\\[3pt]
+ На малом шаре известны\\
+ константы гладкости компонент.\\
+ SVRG решает локальную задачу\\
+ до проверяемой точности. Найденное\\
+ решение задаёт обновление точек метода.};
+\draw[arr] (fast) -- (cert);
+\draw[arr] (cert.east) -- node[lab,above]{да} (answer.west);
+\draw[arr] (cert) -- node[lab,right]{нет} (gate);
+\draw[draw=optimBlue,line width=.65pt] (gate.south) -- (0,-66);
+\draw[arr] (0,-66) -- (-35,-66) -- node[lab,left,pos=.5]{нет} (cut.north);
+\draw[arr] (0,-66) -- (35,-66) -- node[lab,right,pos=.5]{да} (local.north);
+\coordinate (join) at (0,-114);
+\draw[draw=optimBlue] (cut.south) |- (join);
+\draw[draw=optimBlue] (local.south) |- (join);
+\draw[arr] (join) -- (0,-120) -- (-76,-120) -- (-76,0) -- (fast.west);
+\end{tikzpicture}

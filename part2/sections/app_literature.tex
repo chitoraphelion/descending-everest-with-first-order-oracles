@@ -1,0 +1,79 @@
+\clearpage
+\section{Сводная таблица известных оценок}\label{app:literature}
+\enlargethispage{2\baselineskip}
+% В узких колонках таблицы формулам разрешено переноситься.
+\relpenalty=500 \binoppenalty=700
+\providecommand\yes{\textcolor{green!55!black}{\ding{51}}}
+\providecommand\no{\textcolor{red!80!black}{\ding{55}}}
+
+\begin{center}
+\footnotesize
+\captionof{table}{Минимизация суммы: число обращений к оракулу одного слагаемого.}
+\label{tab:lit-sum}
+\renewcommand\arraystretch{1.0}\setlength\tabcolsep{4pt}
+\begin{tabularx}{\linewidth}{@{}P{.18\linewidth}P{.13\linewidth}cP{.14\linewidth}Y@{}}
+\toprule
+Метод и работа & Гладкость & Выпуклые & Критерий & Оценка\\
+\midrule
+\multicolumn{5}{@{}l}{\textit{Сумма, $L$-гладкие слагаемые}}\\
+SAGA\newline\citet{defazio2014saga} & $L$ & \yes & $\E f(\hat x)-f^\ast\le\varepsilon$
+ & $\displaystyle O\Bigl(n+\frac{nF_0+LR^2}{\varepsilon}\Bigr)$\\
+Katyusha с AdaptReg\textsuperscript{\dag}\newline\citet{allenzhu2018katyusha} & $L$ & \yes & $\E f(\hat x)-f^\ast\le\varepsilon$
+ & $\displaystyle O\Bigl(n\log\frac{F_0}{\varepsilon}+\sqrt{\frac{nLR^2}{\varepsilon}}\Bigr)$\\
+Varag\textsuperscript{\ddag}\newline\citet{lan2019varag} & $L$ & \yes & $\E f(\hat x)-f^\ast\le\varepsilon$
+ & $\displaystyle O\Bigl(n+n\log\min\Bigl\{n,\frac{D_0}{\varepsilon}\Bigr\}+\sqrt{\frac{nD_0}{\varepsilon}}\Bigr)$\\
+Нижняя оценка\textsuperscript{\S}\newline\citet{woodworth2016finite} & $L$ & \yes & $\E f(\hat x)-f^\ast\le\varepsilon$
+ & $\displaystyle \Omega\Bigl(n+\sqrt{\frac{nLR^2}{\varepsilon}}\Bigr)$\\
+\midrule
+\multicolumn{5}{@{}l}{\textit{Одна функция ($n=1$), обобщённая гладкость, оракул полного градиента}}\\
+Ускоренный метод\textsuperscript{\P}\newline\citet{tyurin2026accelerated} & sym.\ $(L_0,L_1)$ функции $f$ & \yes & $f(\hat x)-f^\ast\le\varepsilon$
+ & $\displaystyle O\Bigl(\sqrt{\frac{L_0R^2}{\varepsilon}}+L_1R\log_+\min\Bigl\{\frac{2L_1^2F_0}{L_0},\frac{2F_0}{\varepsilon}\Bigr\}$\newline
+ \hspace*{1em}$\displaystyle{}+\log_+\frac{2F_0}{L_0R^2}\Bigr)$\\
+Верхняя и нижняя оценки\textsuperscript{\dag\dag}\newline\citet{rudomanov2026everest} & sym.\ $(L_0,L_1)$ функции $f$ & \yes & $f(\hat x)-f^\ast\le\varepsilon$
+ & $\displaystyle\widetilde\Theta\Bigl(\sqrt{\frac{L_0R^2}{\varepsilon}}+L_1R\Bigr)$;\newline
+ при $F_0\le4\varepsilon$: $\displaystyle\widetilde\Theta\Bigl(\sqrt{\frac{L_0R^2}{\varepsilon}}+(L_1R)^{2/3}\Bigr)$\\
+\midrule
+\multicolumn{5}{@{}l}{\textit{Сумма, обобщённая гладкость}}\\
+$(L_0,L_1)$-SGD, SGD-PS\textsuperscript{\ddag\ddag}\newline\citet{gorbunov2024methods} & sym.\ $(L_0,L_1)$ каждого $f_i$ & \yes & см.\ прим.~\textsuperscript{\ddag\ddag}
+ & $\displaystyle O\Bigl(\frac{L_0R^2}{\varepsilon}\Bigr)$\newline
+ при $\delta=0$ (у всех $f_i$ общая точка минимума)\\
+$(L_0,L_1)$-SPIDER\textsuperscript{\S\S}\newline\citet{reisizadeh2023variance} & усредн.\ $(L_0,L_1)$ & \no & $\norm{\nabla f(\hat x)}\le\varepsilon$ с вероятностью ${}\ge1/2$
+ & $\displaystyle O\Bigl(n+\frac{\sqrt n\,L_0F_0}{\varepsilon^2}\Bigr)$\\
+\midrule
+\textbf{YETI} и нижняя оценка\textsuperscript{\P\P}\newline\textbf{Эта статья}, теорема~\ref{thm:main} & sym.\ $(L_{0,i},L_1)$ каждого $f_i$ & \yes & $\E f(\hat x)-f^\ast\le\varepsilon$
+ & $\displaystyle\widetilde\Theta\Bigl(n\bigl(1+(L_1R)^{2/3}\bigr)+\sqrt{\frac{n(L_0+L_1^2\delta)R^2}{\varepsilon}+n(L_1R)^2}\Bigr)$\\
+\bottomrule
+\end{tabularx}
+\par\smallskip\raggedright\scriptsize
+\emph{Обозначения.} $R=\norm{x_0-x^\ast}$, $F_0=f(x_0)-f^\ast$, $\log_+=\max\{\log,0\}$;
+$O(\cdot)$ и $\Omega(\cdot)$ скрывают абсолютные константы, $\widetilde\Theta(\cdot)$ ---
+ещё и логарифмические множители. Столбец <<Выпуклые>>: \yes{} --- результат получен
+для выпуклых $f_i$, \no{} --- выпуклость не предполагается.\par
+\emph{Гладкость.} $L$: градиент каждого $f_i$ липшицев с константой~$L$.
+sym.: симметричная $(L_0,L_1)$-гладкость \citep[предположение~1.3]{gorbunov2024methods},
+$\norm{\nabla g(x)-\nabla g(y)}\le\bigl(L_0+L_1\sup_{u\in[x,y]}\norm{\nabla g(u)}\bigr)\norm{x-y}$
+при всех $x,y$; для $C^2$ это равносильно $\norm{\nabla^2g(x)}\le L_0+L_1\norm{\nabla g(x)}$.
+Усредн.: усреднённая $(L_0,L_1)$-гладкость \citep[предположение~1(ii)]{reisizadeh2023variance},
+$\bigl(\frac1n\sum_{i=1}^n\norm{\nabla f_i(x)-\nabla f_i(y)}^2\bigr)^{1/2}\le\bigl(L_0+L_1\norm{\nabla f(x)}\bigr)\norm{x-y}$
+при $\norm{x-y}\le1/L_1$: слагаемые ограничены лишь в среднеквадратичном смысле,
+а справа стоит градиент суммы $f$, а не градиенты слагаемых.\par\smallskip
+\textsuperscript{\dag}~При $0<\varepsilon\le F_0/2$.\quad
+\textsuperscript{\ddag}~$D_0=2F_0+\frac32LR^2$; оценка записана при $D_0\ge\varepsilon$.\quad
+\textsuperscript{\dag\dag}~Для детерминированных методов при $L_0R^2\ge\varepsilon$.\par
+\textsuperscript{\S}~Для рандомизированных алгоритмов в достаточно большой размерности, на шаре $\norm x\le R$.\par
+\textsuperscript{\P}~Результат получен для $\ell$-гладких функций,
+$\norm{\nabla^2f(x)}\le\ell(\norm{\nabla f(x)})$: для общей $\ell$ оценка равна
+$O\bigl(\sqrt{\ell(0)}\,R/\sqrt\varepsilon+T\bigr)$ с неявным $T$
+\citep[следствие~5.3]{tyurin2026accelerated}. Здесь она сведена к $\ell(s)=L_0+L_1s$
+\citep[теорема~4.3]{tyurin2026accelerated} при $\bar R=R$, $\Gamma_0=2F_0/R^2$.\par
+\textsuperscript{\ddag\ddag}~Число стохастических градиентов до выполнения
+$\min_k\E\min\bigl\{\frac{\nu L_0}{4nL_1^2},f(x_k)-f^\ast\bigr\}\le\varepsilon$, где
+$\nu=e^{-\nu}$ \citep[теоремы~7.2, 7.3]{gorbunov2024methods}; SGD-PS ещё
+требует знать все $\min f_i$.\par
+\textsuperscript{\S\S}~При $\varepsilon<L_0/(20L_1)$; здесь $F_0=f(x_0)-\inf f$
+\citep[теорема~4]{reisizadeh2023variance}.\par
+\textsuperscript{\P\P}~$L_{0,i}$ могут различаться, $\frac1n\sum_iL_{0,i}\le L_0$.
+Сложность в смысле определения~\ref{def:oracle}; скрыты множители $\log^2N_0$ (нижняя оценка)
+и $\log^2N$ (верхняя). Предположения~\ref{asm:components}--\ref{asm:accuracy}, в том числе $n\ge2$,
+$\Delta\ge2\varepsilon$, $L_1^2R^2\delta/\varepsilon\ge3$; случай $\delta=0$ не охватывается.\par
+\end{center}

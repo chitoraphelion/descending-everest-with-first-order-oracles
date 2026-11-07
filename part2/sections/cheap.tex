@@ -1,0 +1,99 @@
+\section{Метод YETI}\label{sec:cheap}
+YETI сочетает ускоренный проксимальный метод с эвристикой.
+Эвристика предлагает точку $z\in B(0,R)$, опираясь на историю запросов.
+Метод принимает её, если $f(z)\le f(x)$. В одном эвристическом блоке
+допускается не более $n\lceil\log N\rceil$ запросов к оракулу, включая
+проверку предложенных точек. Если блок не завершил работу метода,
+выполняется основная итерация (рис.~\ref{fig:cheap-flow}).
+
+\begin{figure}[H]
+\centering\input{figures/cheap_flow}
+\caption{Схема метода YETI.}\label{fig:cheap-flow}
+\end{figure}
+
+\paragraph{Ускоренный шаг и отсечение.}
+По градиентам компонент в точке $y$ вычислим оценку кривизны
+\[
+ \ell(y)=\frac1n\sum_i\bigl(L_{0,i}+L_1\norm{\nabla f_i(y)}\bigr).
+\]
+По лемме~\ref{lem:observed-curvature} выполнены неравенства
+\[
+ \norm{\nabla^2f(y)}\le\ell(y)
+ \le\tfrac32L_0+2L_1^2\bigl(\delta+f(y)-f^\ast\bigr),
+ \qquad \ell(z)\le e^{L_1\norm{z-y}}\ell(y).
+\]
+Если величина $\ell(y)$ мала, то в шаре радиуса $r=\min\{R,1/(2L_1)\}$
+можно решить регуляризованную задачу методом SVRG и выполнить
+ускоренный шаг. Если же проверка кривизны не пройдена,
+то из верхней границы для $\ell(y)$ следует нижняя оценка невязки $f(y)-f^\ast$.
+В силу выпуклости (предположение~\ref{asm:components}) $\ip{\nabla f(y)}{x^\ast-y}\le-(f(y)-f^\ast)$,
+поэтому эта оценка задаёт полупространство $\mathcal H_y$,
+содержащее точку минимума. Проекция вспомогательной точки $v$
+на это полупространство приближает её к $x^\ast$.
+
+\paragraph{Остановка.}
+В силу предположений~\ref{asm:components} и~\ref{asm:minimizer}
+каждое вычисление $f(p)$ и $\nabla f(p)$ даёт нижнюю оценку
+\[
+ \widetilde f(p)=f(p)-\ip{\nabla f(p)}p-R\norm{\nabla f(p)}\le f^\ast.
+\]
+Подпрограмма \textsc{Оценка} хранит максимум $\widetilde f_{\rm best}$
+таких оценок и лучшую найденную точку $w_{\rm best}\in B(0,R)$.
+Если $f(w_{\rm best})-\widetilde f_{\rm best}\le\varepsilon/2$,
+метод останавливается и возвращает $w_{\rm best}$. Уже полученные ответы
+компонент повторно не запрашиваются.
+
+Алгоритм~\ref{alg:cheap} хранит точки $x,v$, вес $\mathcal A$
+и параметр $h$, по которому выбирается регуляризация. Границы
+$\lambda_\downarrow(\mathcal A)$ и $\lambda_\uparrow$ --- нижнее и верхнее ограничения
+проксимального параметра: на каждой итерации метод берёт
+$\lambda=\min\{\max\{h,\lambda_\downarrow(\mathcal A)\},\lambda_\uparrow\}$.
+Нижнее ограничение удерживает вес ускоренного шага ограниченным, делает локальную
+задачу хорошо обусловленной и обеспечивает остановку; оно не возрастает при росте веса
+$\mathcal A$. Верхнее ограничение $\lambda_\uparrow$ равно значению нижнего при
+начальном весе $\mathcal A=R^2/(2\Delta)$. Явные формулы приведены
+в~\eqref{eq:outer-parameters}. Подпрограммы \textsc{Оценка} и
+\textsc{Блок}, включая правила учёта запросов, приведены
+в приложении~\ref{app:implementation}. Требования к ответу
+\textsc{Решателя} сформулированы в следующем разделе.
+
+\begin{algorithm}[H]
+\caption{YETI}\label{alg:cheap}
+\begin{algorithmic}[1]
+\Require $n$, $R$, $\Delta$, $\delta$, $\varepsilon$, $L_0$, $L_1$,
+константы $L_{0,i}$, эвристика
+\State задать $r$, $\lambda_\downarrow$ и $\lambda_{\uparrow}$ по~\eqref{eq:outer-parameters}
+\State $x=v=0$
+\State $\mathcal A=R^2/(2\Delta)$
+\State $h=\lambda_{\uparrow}$
+\State история запросов пуста
+\Loop
+ \State $x\gets\Call{Блок}{x}$ \Comment{эвристический блок}
+ \State $\lambda=\min\bigl\{\max\{h,\lambda_\downarrow(\mathcal A)\},\lambda_{\uparrow}\bigr\}$
+ \State $a_\lambda=\bigl(1+\sqrt{1+4\lambda\mathcal A}\bigr)/(2\lambda)$
+ \State $\alpha=a_\lambda/(\mathcal A+a_\lambda)$
+ \State $y=(1-\alpha)x+\alpha v$
+ \State \Call{Оценка}{$y$}
+ \State $\ell(y)=\frac1n\sum_i\bigl(L_{0,i}+L_1\norm{\nabla f_i(y)}\bigr)$
+ \If{$\ell(y)>e^{L_1r}\bigl(\frac32L_0+2L_1^2(\delta+R^2/\mathcal A)\bigr)$} \Comment{отсечение}
+  \State $\mathcal H_y=\Bigl\{w:\ \ip{\nabla f(y)}{w-y}\le-\dfrac{\ell(y)-\frac32L_0-2L_1^2\delta}{2L_1^2}\Bigr\}$
+  \State $v\gets\Pi_{B(0,R)}\Pi_{\mathcal H_y}v$
+  \State $h\gets2\lambda$
+ \Else \Comment{шаг по решению локальной задачи}
+  \State $(z,g,\beta)\gets\Call{Решатель}{y,\lambda}$
+  \If{$\norm g\le\varepsilon/(4R)$}
+   \State \Return $z$
+  \EndIf
+  \State $\gamma=\lambda/(\lambda+\beta)$
+  \State $x\gets\dfrac{(1-\gamma)\mathcal Ax+\gamma(\mathcal A+a_\lambda)z}{\mathcal A+\gamma a_\lambda}$
+  \State $v\gets\Pi_{B(0,R)}(v-\gamma a_\lambda g)$
+  \State $\mathcal A\gets\mathcal A+\gamma a_\lambda$
+  \State $h\gets\begin{cases}2\lambda,&\beta>0,\\\lambda/2,&\beta=0\end{cases}$
+  \If{$\mathcal A\ge2R^2/\varepsilon$}
+   \State \Return $x$
+  \EndIf
+ \EndIf
+\EndLoop
+\end{algorithmic}
+\end{algorithm}
+

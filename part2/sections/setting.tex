@@ -1,0 +1,133 @@
+\section{Постановка задачи и основные оценки}\label{sec:setting}
+
+Рассматривается функция $f=n^{-1}\sum_{i=1}^n f_i$ на $\R^d$.
+Заданы $n\ge2$, $L_0,\delta\ge0$ и $L_1,R,\Delta,\varepsilon>0$.
+Начальную точку считаем нулевой; этого можно добиться сдвигом координат.
+Все общие предположения собраны ниже.
+
+\begin{assumption}[компоненты]\label{asm:components}
+Функции $f_i:\R^d\to\R$, $1\le i\le n$, выпуклы,
+дважды непрерывно дифференцируемы и ограничены снизу.
+\end{assumption}
+
+\begin{assumption}[обобщённая гладкость]\label{asm:smoothness}
+Известны числа $L_{0,i}\ge0$, для которых
+\begin{equation}\label{eq:component-class}
+ \begin{gathered}
+ \norm{\nabla^2 f_i(x)}\le L_{0,i}+L_1\norm{\nabla f_i(x)}
+ \quad(x\in\R^d,\ 1\le i\le n),\\
+ \frac1n\sum_{i=1}^n L_{0,i}\le L_0.
+ \end{gathered}
+\end{equation}
+\end{assumption}
+
+\begin{assumption}[точка минимума]\label{asm:minimizer}
+Существует точка минимума $x^\ast\in\argmin f$, для которой $\norm{x^\ast}\le R$.
+Обозначим $f^\ast=f(x^\ast)$.
+\end{assumption}
+
+\begin{assumption}[начальная невязка]\label{asm:initial-gap}
+Выполнено $f(0)-f^\ast\le\Delta$, причём $\Delta\ge2\varepsilon$.
+\end{assumption}
+
+\begin{assumption}[неоднородность]\label{asm:heterogeneity}
+\begin{equation}\label{eq:problem-bounds}
+ f^\ast-\frac1n\sum_{i=1}^n\inf_{x\in\R^d}f_i(x)\le\delta.
+\end{equation}
+\end{assumption}
+
+\begin{assumption}[диапазон точностей]\label{asm:accuracy}
+\begin{equation}\label{eq:nondegenerate}
+ \frac{L_1^2R^2\delta}{\varepsilon}\ge3.
+\end{equation}
+\end{assumption}
+
+\begin{definition}[класс задач]\label{def:class}
+Через $\mathcal P_d$ обозначим множество наборов функций
+$f_1,\ldots,f_n:\R^d\to\R$ и известных чисел $L_{0,1},\ldots,L_{0,n}$,
+удовлетворяющих предположениям~\ref{asm:components}--\ref{asm:heterogeneity}.
+\end{definition}
+
+Предположение~\ref{asm:smoothness} ограничивает только среднее
+чисел $L_{0,i}$; отдельные $L_{0,i}$ могут превышать $L_0$.
+Нижнюю оценку достаточно построить на подклассе $L_{0,i}=L_0$.
+Для $C^2$-функций ограничение на гессиан из предположения~\ref{asm:smoothness} эквивалентно
+симметричной $(L_{0,i},L_1)$-гладкости
+\citep[предположение~1.3, формула~(5)]{gorbunov2024methods}:
+\[
+ \norm{\nabla f_i(x)-\nabla f_i(y)}
+ \le\Bigl(L_{0,i}+L_1\sup_{z\in[x,y]}\norm{\nabla f_i(z)}\Bigr)\norm{x-y}.
+\]
+Предположение~\ref{asm:heterogeneity} не требует знать ни $f^\ast$,
+ни инфимумы компонент.
+Предположение~\ref{asm:accuracy} гарантирует, что в трудной задаче
+со скрытой парой функций из раздела~\ref{sec:lower} начальная невязка больше
+требуемой точности (лемма~\ref{lem:lower-pair}).
+
+\paragraph{Модель оракула.}
+Алгоритму известны параметры задачи и числа $L_{0,i}$.
+Информацию о функциях он получает только от оракула, возвращающего
+$(f_i(x),\nabla f_i(x))$ на запрос $(i,x)$.
+Запросы разрешены во всём $\R^d$.
+Точки запросов, момент остановки и выдаваемый ответ являются измеримыми
+функциями от полученных ответов оракула и случайных величин алгоритма.
+Сложность измеряется числом обращений к оракулу
+\citep[раздел~1.1]{nesterov2018lectures}.
+Вычисление значения функции и полного градиента в одной точке требует $n$ запросов.
+
+\begin{definition}[оракульная сложность]\label{def:oracle}
+Пусть $\tau_{\mathsf M}(p)$ --- число обращений алгоритма $\mathsf M$
+к оракулу на входе $p$, а $\hat x_{\mathsf M}(p)$ --- его ответ.
+Алгоритм называется корректным, если для любых $d$ и $p\in\mathcal P_d$
+он почти наверное останавливается и
+\[
+ \E\bigl[f(\hat x_{\mathsf M}(p))-f^\ast\bigr]\le\varepsilon.
+\]
+Сложность алгоритма на классе и минимаксная сложность определяются как
+\begin{equation}\label{eq:minimax}
+ \begin{aligned}
+ \mathcal T(\mathsf M)
+ &=\sup_{d\ge1}\ \sup_{p\in\mathcal P_d}\E\tau_{\mathsf M}(p),\\
+ \mathcal T^\ast&=\inf_{\mathsf M\ \text{корректный}}\mathcal T(\mathsf M).
+ \end{aligned}
+\end{equation}
+\end{definition}
+
+Для оценки числа запросов положим
+\begin{equation}\label{eq:complexity-parameters}
+ N_0=4+n+\frac{(L_0+L_1^2\delta)R^2}{\varepsilon}+(L_1R)^2,
+ \qquad N=N_0-2+\frac\Delta\varepsilon.
+\end{equation}
+
+Для неотрицательных величин запись $a\lesssim b$ означает
+$a\le Cb$ с абсолютной постоянной $C$,
+не зависящей от параметров задачи, размерности и алгоритма.
+Пишем $a\sim b$, если $a\lesssim b\lesssim a$.
+Обозначения $O$ и $\Omega$ используются в том же равномерном смысле,
+а $\widetilde\Theta$ скрывает также степени $\log N$.
+В нижней оценке используется величина $N_0$, не зависящая от $\Delta$,
+а в верхней --- величина $N$, которая по предположению~\ref{asm:initial-gap}
+не меньше $N_0$.
+Положим
+\begin{equation}\label{eq:complexity-order}
+ T_0=
+ n\bigl(1+(L_1R)^{2/3}\bigr)
+ +\sqrt{\frac{n(L_0+L_1^2\delta)R^2}{\varepsilon}+n(L_1R)^2}.
+\end{equation}
+
+\begin{theorem}[двусторонняя оценка сложности]\label{thm:main}
+При предположениях~\ref{asm:components}--\ref{asm:accuracy} выполнено
+\begin{equation}\label{eq:main-bounds}
+ \frac{T_0}{\log^2N_0}\lesssim\mathcal T^\ast
+ \lesssim T_0\log^2N.
+\end{equation}
+\end{theorem}
+
+Верхняя оценка достигается методом YETI, в том числе
+при различных $L_{0,i}$.
+Нижняя оценка верна уже при $L_{0,i}=L_0$.
+
+Верхняя оценка доказана в теореме~\ref{thm:cheap-upper},
+нижняя --- в теореме~\ref{thm:lower}. Доказательства приведены
+в приложениях~\ref{app:upper-constants} и~\ref{app:lower-constants}.
+Вопрос об устранении разрыва в логарифмических множителях остаётся открытым.

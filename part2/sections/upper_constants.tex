@@ -1,0 +1,108 @@
+\section{Доказательство верхней оценки}\label{app:upper-constants}
+Используем $N$ и $T_0$ из раздела~\ref{sec:setting}.
+Все оценки ниже равномерны по параметрам задачи и истории метода.
+
+\subsection{Число основных итераций}
+По выбору радиуса $r$ имеем
+\[
+ \frac Rr=\max\{1,2L_1R\}\le2\sqrt N.
+\]
+Из~\eqref{eq:outer-parameters} следует
+\begin{equation}\label{eq:lambda-range-bound}
+ \begin{aligned}
+ \frac{\lambda_{\uparrow}rR}{\varepsilon}
+ &\lesssim
+ \frac\Delta\varepsilon\left(\frac Rr\right)^{1/3}
+ +\frac{(L_0+L_1^2\delta)R^2}{n\varepsilon}
+ +\frac\Delta\varepsilon\frac{L_1R}{n}+1
+ \lesssim N^{3/2}.
+ \end{aligned}
+\end{equation}
+Поэтому логарифмы в~\eqref{eq:outer-budget} имеют порядок $O(\log N)$.
+
+\begin{lemma}\label{lem:outer-numerical}
+Число основных итераций удовлетворяет
+\begin{equation}\label{eq:outer-13}
+ nK_{\rm out}\lesssim T_0\log N.
+\end{equation}
+\end{lemma}
+\begin{proof}
+Подставляя~\eqref{eq:lambda-range-bound} в~\eqref{eq:outer-budget}, получаем
+\[
+ nK_{\rm out}\lesssim\log N\left[
+ n\left(\frac Rr\right)^{2/3}
+ +\sqrt n\,L_1R
+ +\sqrt{\frac{n(L_0+L_1^2\delta)R^2}{\varepsilon}}\right].
+\]
+Остаётся использовать $(R/r)^{2/3}\sim1+(L_1R)^{2/3}$
+и $a+b\sim\sqrt{a^2+b^2}$ для $a,b\ge0$.
+\end{proof}
+
+\subsection{Число запросов локального решателя}
+Проверка кривизны~\eqref{eq:simple-curvature-test} и нижняя граница
+для $\lambda$ дают
+\begin{equation}\label{eq:condition-number-simple}
+ \kappa:=\frac{\overline L}{\lambda}
+ =1+\frac{e^{3L_1r}\ell(y)}\lambda
+ \le1+ne^{4L_1r}\le1+ne^2\le8n,
+\end{equation}
+поскольку $L_1r\le1/2$ и $n\ge2$. Здесь использовано, что одна и та же величина
+$\frac32L_0+2L_1^2(\delta+R^2/\mathcal A)$ входит и в проверку кривизны,
+и в нижнюю границу для $n\lambda$.
+
+\begin{lemma}\label{lem:epoch-numerical}
+При любой истории, предшествующей локальному вызову,
+\begin{equation}\label{eq:epoch-37}
+ \E[T_{\rm ep}\mid\text{история}]\le2+\lceil\log_2\Gamma\rceil,
+ \qquad n+M\le36n,
+\end{equation}
+где $\Gamma$ задано в лемме~\ref{lem:local-certificate} и
+$\Gamma\le9(8n)^3$.
+В частности, условное математическое ожидание числа запросов
+локального решателя имеет порядок $O(n\log(n+2))$.
+\end{lemma}
+\begin{proof}
+По~\eqref{eq:condition-number-simple} длина эпохи
+$M=\lceil21\kappa/5\rceil\le1+168n/5\le35n$.
+Для величины $\Gamma$ из~\eqref{eq:epoch-tail} имеем
+\[
+ \Gamma=\left(1+\frac{2\kappa}{3}\right)
+         \left(1+\frac{5\kappa}{4}\right)^2
+ \le\frac{5\kappa}{3}\left(\frac{9\kappa}{4}\right)^2
+ \le9\kappa^3\le9(8n)^3,
+\]
+так как $\kappa\ge1$. Положим $j_0=\lceil\log_2\Gamma\rceil$.
+Суммируя хвостовую оценку~\eqref{eq:epoch-tail}, получаем
+\[
+ \E[T_{\rm ep}\mid\text{история}]
+ \le1+\sum_{j\ge1}\min\{1,\Gamma2^{-j}\}
+ \le1+j_0+\sum_{j>j_0}\Gamma2^{-j}\le j_0+2.
+\]
+Каждая эпоха вместе с проверкой результата требует $O(n+M)=O(n)$ запросов.
+\end{proof}
+
+\subsection{Суммарное число запросов}\label{app:upper-total}
+\begin{proof}[Доказательство теоремы~\ref{thm:cheap-upper}]
+По леммам~\ref{lem:outer-potential} и~\ref{lem:outer-count}
+метод почти наверное останавливается с невязкой не более
+$\varepsilon/2$. Это доказывает~\eqref{eq:cheap-upper-final}.
+
+Если проверка кривизны не пройдена, основная итерация требует $n$ запросов.
+Иначе по лемме~\ref{lem:epoch-numerical} условное среднее число запросов
+равно $O(n\log(n+2))$. Эта оценка включает вычисления в центре,
+в опорных точках и при проверке результата решателя.
+Остановка по истории может лишь уменьшить число запросов:
+для сравнения работу решателя можно продолжить с новыми случайными индексами
+до выполнения его собственного критерия остановки. Каждый эвристический блок
+по определению из раздела~\ref{sec:heuristic-block}
+делает $O(n\log N)$ запросов.
+Поскольку $n+2\le N$, эта же оценка применима и к основной итерации.
+
+Число основных итераций и предшествующих им блоков не превосходит
+$K_{\rm out}$. Суммируя условные оценки и используя~\eqref{eq:outer-13}, получаем
+\[
+ \E T\lesssim nK_{\rm out}\log N\lesssim T_0\log^2N.
+\]
+Оценка равномерна по всем эвристикам, допустимым
+в блоке из раздела~\ref{sec:heuristic-block}.
+\end{proof}

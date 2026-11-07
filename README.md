@@ -1,1 +1,11 @@
-В репозитории лежит версия статьи "Descending Everest with First-Order Oracles, Oracle Complexity of Convex Optimization under $(L_0,L_1)$-Smoothness" на русском языке.
+Русские версии статей цикла «Спуск с Эвереста».
+
+- `part1/` — «Спуск с Эвереста». Оракульная сложность выпуклой оптимизации при $(L_0,L_1)$-гладкости. Английская версия: [arXiv:2610.21461](https://arxiv.org/abs/2610.21461).
+- `part2/` — «Спуск с Эвереста», часть II. Оракульная сложность минимизации суммы выпуклых $(L_0,L_1)$-гладких функций. Английская версия: [arXiv:2611.04171](https://arxiv.org/abs/2611.04171).
+
+Сборка (XeLaTeX, BibTeX, шрифты CMU из пакета cm-unicode):
+
+```
+cd part1 && latexmk -xelatex main.tex
+./part2/build.sh
+```

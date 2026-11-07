@@ -1,0 +1,303 @@
+\section{Аналитические свойства класса}\label{sec:analytic-tools}
+
+Вспомогательные леммы сформулированы для произвольной функции $\varphi$.
+К компонентам $f_i$ они применяются в силу предположений~\ref{asm:components}
+и~\ref{asm:smoothness} с константой $L_{0,i}$ вместо $L_0$.
+
+\subsection{Локальная гладкость}
+
+См. также \citet[лемма~A.1]{rudomanov2026everest}
+и \citet[лемма~2.5]{vankov2025optimizing}.
+
+\begin{lemma}[рост градиента вдоль отрезка]\label{lem:local-transfer}
+Пусть $\varphi\in C^2(\mathbb R^d)$ и
+$\norm{\nabla^2\varphi(x)}\le L_0+L_1\norm{\nabla\varphi(x)}$
+для всех $x$. Тогда для любых $x,y$ выполняется
+\begin{equation}\label{eq:local-transfer}
+ L_0+L_1\norm{\nabla\varphi(x)}
+ \le e^{L_1\norm{x-y}}
+       \bigl(L_0+L_1\norm{\nabla\varphi(y)}\bigr).
+\end{equation}
+В частности, на шаре $B(y,r)$ градиент $\varphi$ липшицев с константой
+$e^{L_1r}(L_0+L_1\norm{\nabla\varphi(y)})$.
+\end{lemma}
+
+\begin{proof}
+По формуле Ньютона--Лейбница
+\[
+ \nabla\varphi(y+t(x-y))-\nabla\varphi(y)
+ =\int_0^t\nabla^2\varphi(y+u(x-y))(x-y)\,du.
+\]
+Взяв норму и применив условие на гессиан, для $t\in[0,1]$ получаем
+\[
+ L_0+L_1\norm{\nabla\varphi(y+t(x-y))}
+ \le L_0+L_1\norm{\nabla\varphi(y)}
+ +L_1\norm{x-y}\int_0^t\bigl(L_0+L_1\norm{\nabla\varphi(y+u(x-y))}\bigr)\,du.
+\]
+По неравенству Гронуолла
+\[
+ L_0+L_1\norm{\nabla\varphi(y+t(x-y))}
+ \le e^{L_1\norm{x-y}t}\bigl(L_0+L_1\norm{\nabla\varphi(y)}\bigr).
+\]
+При $t=1$ получаем первое утверждение. Для $x\in B(y,r)$ оно даёт оценку
+нормы гессиана на всём шаре, а интегрирование гессиана по отрезкам
+внутри выпуклого шара доказывает липшицевость градиента.
+\end{proof}
+
+\citep[Теорема Байона--Хаддада,][]{bauschke2010}
+
+\begin{lemma}[кокоэрцитивность на выпуклой области]\label{lem:local-cocoercivity}
+Пусть $\varphi$ выпукла и дважды непрерывно дифференцируема
+в окрестности выпуклого множества $\mathcal D$. Если
+$\norm{\nabla^2\varphi}\le L$ на $\mathcal D$, где $L>0$, то для всех
+$x,z\in\mathcal D$
+\[
+ \norm{\nabla\varphi(x)-\nabla\varphi(z)}^2
+ \le L\ip{\nabla\varphi(x)-\nabla\varphi(z)}{x-z}.
+\]
+\end{lemma}
+
+\begin{proof}
+Средний гессиан
+\[
+ H=\int_0^1\nabla^2\varphi(z+t(x-z))\,dt
+\]
+удовлетворяет $0\preceq H\preceq LI$ по выпуклости, поэтому
+$H^2\preceq LH$ и
+\[
+ \norm{\nabla\varphi(x)-\nabla\varphi(z)}^2
+ =\ip{x-z}{H^2(x-z)}
+ \le L\ip{x-z}{H(x-z)}
+ =L\ip{\nabla\varphi(x)-\nabla\varphi(z)}{x-z}.
+\]
+\end{proof}
+
+\begin{lemma}[оценка разности градиентов]\label{lem:local-bregman}
+Пусть $\varphi$ выпукла, $\varphi\in C^2(\mathbb R^d)$ и
+$\norm{\nabla^2\varphi}\le L$ на $B(y,3r)$, где $L>0$.
+Тогда для $x,w\in B(y,r)$ выполнено
+\[
+ \norm{\nabla\varphi(x)-\nabla\varphi(w)}^2
+ \le2L\bigl(\varphi(x)-\varphi(w)
+                     -\ip{\nabla\varphi(w)}{x-w}\bigr).
+\]
+\end{lemma}
+
+\begin{proof}
+Так как градиент функции $\varphi$ является $L$-липшицевым на $B(y,r)$
+и $x,w\in B(y,r)$, имеем
+\[
+ \norm{\nabla\varphi(x)-\nabla\varphi(w)}\le L\norm{x-w}\le2Lr.
+\]
+Поэтому точка
+\[
+ q=x-\frac1L\bigl(\nabla\varphi(x)-\nabla\varphi(w)\bigr)
+\]
+лежит в $B(y,3r)$, а значит, и весь отрезок $[x,q]$ содержится в $B(y,3r)$.
+Функция
+\[
+ z\mapsto\varphi(z)-\varphi(w)-\ip{\nabla\varphi(w)}{z-w}
+\]
+выпукла, неотрицательна во всём пространстве и имеет на $B(y,3r)$
+$L$-липшицев градиент $\nabla\varphi(z)-\nabla\varphi(w)$.
+Квадратичная оценка сверху на отрезке $[x,q]$ даёт
+\begin{align*}
+ 0&\le\varphi(q)-\varphi(w)-\ip{\nabla\varphi(w)}{q-w}
+ \\&\le\varphi(x)-\varphi(w)-\ip{\nabla\varphi(w)}{x-w}
+   +\ip{\nabla\varphi(x)-\nabla\varphi(w)}{q-x}+\frac L2\norm{q-x}^2
+ \\&=\varphi(x)-\varphi(w)-\ip{\nabla\varphi(w)}{x-w}
+   -\frac1{2L}\norm{\nabla\varphi(x)-\nabla\varphi(w)}^2.
+\end{align*}
+Остаётся перенести последнее слагаемое в левую часть.
+\end{proof}
+
+\subsection{Оценка нормы градиента через невязку}
+
+Ср. \citet{li2023generalized} и \citet[лемма~3.4]{yu2026mirror}.
+
+\begin{lemma}[интегральная оценка нормы градиента]\label{lem:self-bound}
+Пусть $\varphi$ выпукла, ограничена снизу, принадлежит
+$C^2(\mathbb R^d)$ и удовлетворяет условию леммы~\ref{lem:local-transfer}.
+Тогда для любого $x$
+\begin{equation}\label{eq:integral-self-bound}
+ \begin{gathered}
+ \int_0^{\norm{\nabla\varphi(x)}}\frac{t}{L_0+L_1t}\,dt
+ \le\varphi(x)-\inf\varphi,\\
+ \norm{\nabla\varphi(x)}
+ \le L_1\bigl(\varphi(x)-\inf\varphi\bigr)
+ +\sqrt{2L_0\bigl(\varphi(x)-\inf\varphi\bigr)}.
+ \end{gathered}
+\end{equation}
+При $L_0=0$ подынтегральная функция доопределяется в нуле по непрерывности.
+Достижимость инфимума не предполагается.
+\end{lemma}
+
+\begin{proof}
+При $\nabla\varphi(x)=0$ утверждение очевидно. Иначе выберем $h>0$ так, чтобы
+\[
+ \begin{gathered}
+ L_1h\norm{\nabla\varphi(x)}\le\tfrac12,\\
+ h\bigl(L_0+L_1\norm{\nabla\varphi(x)}\bigr)\le\tfrac12,
+ \end{gathered}
+\]
+и рассмотрим градиентный спуск из точки $x_0=x$:
+\[
+ x_{j+1}=x_j-h\nabla\varphi(x_j).
+\]
+
+\begin{itemize}
+\item Норма градиента не возрастает. Пусть
+$\norm{\nabla\varphi(x_j)}\le\norm{\nabla\varphi(x)}$. Отрезок
+$[x_j,x_{j+1}]$ имеет длину $h\norm{\nabla\varphi(x_j)}$, поэтому
+по лемме~\ref{lem:local-transfer} норма гессиана на нём не превосходит
+\begin{equation}\label{eq:self-bound-step-curvature}
+ e^{L_1h\norm{\nabla\varphi(x_j)}}
+ \bigl(L_0+L_1\norm{\nabla\varphi(x_j)}\bigr)
+ \le2\bigl(L_0+L_1\norm{\nabla\varphi(x)}\bigr)
+ \le\frac1h.
+\end{equation}
+Значит, средний гессиан $H_j$ на этом отрезке удовлетворяет
+$0\preceq hH_j\preceq I$, и
+\[
+ \begin{gathered}
+ \nabla\varphi(x_{j+1})=(I-hH_j)\nabla\varphi(x_j),\\
+ \norm{\nabla\varphi(x_{j+1})}\by{\le}{(a)}\norm{\nabla\varphi(x_j)}.
+ \end{gathered}
+\]
+Здесь (a) следует из $0\preceq I-hH_j\preceq I$.
+По индукции эти оценки верны для всех $j$.
+
+\item Оценим две телескопические суммы. Квадратичная оценка сверху
+вместе с оценкой кривизны~\eqref{eq:self-bound-step-curvature} даёт
+\[
+ \varphi(x_j)-\varphi(x_{j+1}) \ge h\norm{\nabla\varphi(x_j)}^2
+ -\frac{h^2}{2}e^{L_1h\norm{\nabla\varphi(x_j)}}
+ \bigl(L_0+L_1\norm{\nabla\varphi(x_j)}\bigr)\norm{\nabla\varphi(x_j)}^2 \ge\frac h2\norm{\nabla\varphi(x_j)}^2.
+\]
+Подынтегральная функция $t/(L_0+L_1t)$ не убывает, а
+\[
+ \norm{\nabla\varphi(x_j)}-\norm{\nabla\varphi(x_{j+1})}
+ \le\norm{hH_j\nabla\varphi(x_j)}.
+\]
+Поэтому
+\[
+ \int_{\norm{\nabla\varphi(x_{j+1})}}^{\norm{\nabla\varphi(x_j)}}
+ \frac{t\,dt}{L_0+L_1t} \le\frac{\norm{\nabla\varphi(x_j)}}{L_0+L_1\norm{\nabla\varphi(x_j)}}
+ \norm{hH_j\nabla\varphi(x_j)} \by{\le}{(a)}
+ he^{L_1h\norm{\nabla\varphi(x_j)}}\norm{\nabla\varphi(x_j)}^2.
+\]
+Здесь (a) следует из оценки~\eqref{eq:self-bound-step-curvature}
+для $\norm{H_j}$. Так как $e^s-1\le2s$ и $e^s\le2$ при $0\le s\le1/2$,
+из оценки убывания функции и последней оценки интеграла получаем
+\[
+ \int_{\norm{\nabla\varphi(x_{j+1})}}^{\norm{\nabla\varphi(x_j)}}
+ \frac{t\,dt}{L_0+L_1t}
+ \le\varphi(x_j)-\varphi(x_{j+1})
+ +h^2\bigl(L_0+3L_1\norm{\nabla\varphi(x)}\bigr)\norm{\nabla\varphi(x_j)}^2.
+\]
+Суммируя неравенство
+\[
+ \varphi(x_i)-\varphi(x_{i+1})\ge\frac h2\norm{\nabla\varphi(x_i)}^2
+\]
+по $i=0,\ldots,m-1$, получаем
+\[
+ h\sum_{i<m}\norm{\nabla\varphi(x_i)}^2\le2\bigl(\varphi(x)-\inf\varphi\bigr).
+\]
+Суммируя оценку разности интегралов по $i=0,\ldots,j-1$, где $0\le j<m$,
+и используя полученную оценку суммы квадратов норм градиентов, получаем
+\[
+ \int_0^{\norm{\nabla\varphi(x)}}\frac{t\,dt}{L_0+L_1t}
+ \le\bigl(\varphi(x)-\inf\varphi\bigr)
+ \Bigl(1+2h\bigl(L_0+3L_1\norm{\nabla\varphi(x)}\bigr)\Bigr)
+ +\int_0^{\norm{\nabla\varphi(x_j)}}\frac{t\,dt}{L_0+L_1t}.
+\]
+Возьмём $m=\lceil h^{-2}\rceil$ и индекс $j<m$ с наименьшей нормой
+$\norm{\nabla\varphi(x_j)}$. Тогда
+\[
+ \norm{\nabla\varphi(x_j)}^2
+ \le\frac{2(\varphi(x)-\inf\varphi)}{mh}\to0
+ \quad\text{при }h\downarrow0.
+\]
+Последний интеграл не превосходит $\norm{\nabla\varphi(x_j)}/L_1$,
+поэтому, переходя к пределу, получаем первое
+неравенство~\eqref{eq:integral-self-bound}.
+
+\item При $L_0=0$ интеграл равен $\norm{\nabla\varphi(x)}/L_1$, что сразу
+даёт второе неравенство. При $L_0>0$ после замены $t=L_0s/L_1$
+интегральная оценка принимает вид
+\[
+ \frac{L_1\norm{\nabla\varphi(x)}}{L_0}
+ -\log\Bigl(1+\frac{L_1\norm{\nabla\varphi(x)}}{L_0}\Bigr)
+ \le\frac{L_1^2(\varphi(x)-\inf\varphi)}{L_0}.
+\]
+Функция $s\mapsto s-\log(1+s)$ возрастает при $s\ge0$. Для
+$v\ge0$ из разложения экспоненты в ряд следует $e^{\sqrt{2v}}\ge1+\sqrt{2v}+v$, поэтому
+\[
+ (v+\sqrt{2v})-\log(1+v+\sqrt{2v})\ge v.
+\]
+Применив это неравенство при $v=L_1^2(\varphi(x)-\inf\varphi)/L_0$, получаем
+\[
+ \frac{L_1\norm{\nabla\varphi(x)}}{L_0}
+ \le\frac{L_1^2(\varphi(x)-\inf\varphi)}{L_0}
+ +\sqrt{\frac{2L_1^2(\varphi(x)-\inf\varphi)}{L_0}},
+\]
+что и требовалось.
+\end{itemize}
+\end{proof}
+
+\subsection{Оценка локальной кривизны суммы}\label{app:observed-curvature}
+
+\begin{proof}[Доказательство леммы~\ref{lem:observed-curvature}\proofup{lem:observed-curvature}]
+Для среднего неотрицательных величин $f_i(y)-\inf f_i$ имеем
+\[
+ \frac1n\sum_i\bigl(f_i(y)-\inf f_i\bigr)
+ =f(y)-f^\ast+f^\ast-\frac1n\sum_i\inf f_i
+ \by{\le}{\text{\ref{asm:heterogeneity}}}\delta+f(y)-f^\ast.
+\]
+По лемме~\ref{lem:self-bound}, применимой в силу
+предположений~\ref{asm:components} и~\ref{asm:smoothness},
+\begin{align*}
+ &\frac1n\sum_i\norm{\nabla f_i(y)}\le\frac{L_1}n\sum_i\bigl(f_i(y)-\inf f_i\bigr)
+ +\frac1n\sum_i\sqrt{2L_{0,i}\bigl(f_i(y)-\inf f_i\bigr)}
+ \\&\qquad\by{\le}{(a)}
+ L_1\bigl(\delta+f(y)-f^\ast\bigr)+\sqrt{2L_0\bigl(\delta+f(y)-f^\ast\bigr)},
+ \\
+ &\ell(y)\le L_0+L_1^2\bigl(\delta+f(y)-f^\ast\bigr)
+ +L_1\sqrt{2L_0\bigl(\delta+f(y)-f^\ast\bigr)}
+ \\&\qquad\by{\le}{(b)}
+ \tfrac32L_0+2L_1^2\bigl(\delta+f(y)-f^\ast\bigr).
+\end{align*}
+В (a) использованы неравенство Коши--Буняковского--Шварца
+и ограничение на среднее значение $L_{0,i}$ из предположения~\ref{asm:smoothness};
+(b) следует из $2ab\le a^2+b^2$.
+Неравенство треугольника даёт обе оценки для $\norm{\nabla f(y)}$.
+Остальные утверждения получаются суммированием оценок
+леммы~\ref{lem:local-transfer} с учётом предположения~\ref{asm:smoothness}.
+\end{proof}
+
+\Needspace{10\baselineskip}
+\subsection{Вырожденный класс}\label{app:degenerate}
+
+\begin{proposition}\label{prop:degenerate-class}
+При предположениях~\ref{asm:components}--\ref{asm:minimizer}
+и~\ref{asm:heterogeneity}, если $L_0=\delta=0$, то все компоненты постоянны.
+Следовательно, минимаксная оракульная сложность такого класса равна нулю.
+\end{proposition}
+
+\begin{proof}
+В силу предположения~\ref{asm:smoothness} из $L_0=0$ следует
+$L_{0,i}=0$. В точке $x^\ast$ из предположения~\ref{asm:minimizer} имеем
+\[
+ 0\le\frac1n\sum_i\bigl(f_i(x^\ast)-\inf f_i\bigr)
+ =f^\ast-\frac1n\sum_i\inf f_i\by{\le}{\text{\ref{asm:heterogeneity}}}\delta=0.
+\]
+Значит, каждое слагаемое равно нулю, откуда $\nabla f_i(x^\ast)=0$.
+Лемма~\ref{lem:local-transfer} при $L_{0,i}=0$ даёт
+\[
+ \norm{\nabla f_i(x)}\le e^{L_1\norm{x-x^\ast}}
+ \norm{\nabla f_i(x^\ast)}=0
+\]
+для любого $x$. Следовательно, все компоненты постоянны, и ответ $0$
+можно выдать без единого запроса к оракулу.
+\end{proof}
+

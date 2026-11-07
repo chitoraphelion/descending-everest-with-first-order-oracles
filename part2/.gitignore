@@ -1,0 +1,20 @@
+# Intermediate files from the build script.
+.build/
+
+# Intermediate files from editors building next to main.tex.
+/main.aux
+/main.bbl
+/main.blg
+/main.fdb_latexmk
+/main.fls
+/main.log
+/main.out
+/main.xdv
+/main.synctex.gz
+/main.toc
+
+# Optional raster previews and Python caches.
+/figures/*.png
+__pycache__/
+*.py[cod]
+.DS_Store

@@ -1,0 +1,136 @@
+% Сборка: ./build.sh из этой директории либо ./part2/build.sh из корня.
+\documentclass[11pt,a4paper]{article}
+\usepackage[round,authoryear,comma]{natbib}
+\usepackage[russian]{optimstyle}
+\usepackage{tabularx,pifont,calc,xurl,fontawesome5,nicefrac}
+\usepackage{placeins}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,calc}
+\colorlet{cheapline}{optimBlue}
+\colorlet{cheapfill}{optimBlue!5!white}
+\newcommand{\R}{\mathbb R}
+\newcommand{\E}{\mathbb E}
+\newcommand{\ip}[2]{\langle #1,#2\rangle}
+\newcommand{\norm}[1]{\lVert#1\rVert}
+\newcommand{\eps}{\varepsilon}
+\newcommand{\Fs}{f^\ast}
+\DeclareMathOperator{\argmin}{arg\,min}
+\DeclareMathOperator{\dist}{dist}
+\newcommand{\by}[2]{\mathrel{\underset{#2}{#1}}}
+\newcommand{\bypad}[3]{\mathrel{\underset{\mathmakebox[\widthof{$\scriptstyle#3$}]{#2}}{#1}}}
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+% Expand generated rows directly inside tabular, before booktabs rules.
+\makeatletter
+\newcommand{\experimentrows}[1]{\@@input #1 }
+\makeatother
+\setlist[itemize]{label=$\vartriangleright$}
+\algrenewcommand\algorithmicloop{\textbf{повторять}}
+\algrenewcommand\algorithmicwhile{\textbf{пока}}
+\relpenalty=10000 \binoppenalty=10000 \emergencystretch=10em
+\BeforeBeginEnvironment{theorem}{\Needspace{6\baselineskip}}
+\BeforeBeginEnvironment{lemma}{\Needspace{6\baselineskip}}
+\BeforeBeginEnvironment{proposition}{\Needspace{6\baselineskip}}
+\BeforeBeginEnvironment{definition}{\Needspace{6\baselineskip}}
+\BeforeBeginEnvironment{assumption}{\Needspace{7\baselineskip}}
+\tcbset{optimassumption/.style={optimbox,colback=optimGreen!5!white,
+  colframe=optimGreen!45!white,borderline west={1.2pt}{0pt}{optimGreen}}}
+% Keep subsection headings with the following proof or displayed formula.
+\pretocmd{\subsection}{\Needspace{8\baselineskip}}{}{}
+\renewcommand{\optimtitlefont}{\fontsize{16}{21}\selectfont\bfseries\boldmath}
+\title{«Спуск с Эвереста», часть~II\texorpdfstring{\\[3pt]}{: }
+Оракульная сложность минимизации суммы\texorpdfstring{\\}{ }
+выпуклых \texorpdfstring{$(L_0,L_1)$}{(L0,L1)}-гладких функций\texorpdfstring{\thanks{Английская версия статьи: \url{https://arxiv.org/abs/2611.04171}.}}{}}
+% Как в первой части: в шапке только имена; аффилиации и почты вынесены в сноски.
+\author{%
+  Михаил Рудоманов\thanks{MIRIAI, Moscow Independent Research Institute of Artificial Intelligence, Москва, Россия. \email{rudomanov.ma@phystech.edu}.}\,\thanks{Равный вклад.}\quad
+  Иван Фомин\thanks{Яндекс, Москва, Россия. \email{ash-ivanfomin@yandex-team.ru}.}\,\footnotemark[3]\\[4pt]
+  Александр Владимирович Гасников\thanks{Университет Иннополис, Иннополис, Россия. \email{gasnikov@yandex.ru}.}\quad
+  Федор Сергеевич Стонякин\thanks{КФУ им.~В.\,И.~Вернадского, Симферополь, Россия. \email{fedyor@mail.ru}.}}
+\hypersetup{pdfauthor={Михаил Рудоманов, Иван Фомин, Александр Владимирович Гасников, Федор Сергеевич Стонякин}}
+\date{}
+\keywords{$(L_0,L_1)$-гладкость, обобщённая гладкость, минимизация суммы функций,
+оракульная сложность, нижние оценки, ускоренные методы, уменьшение дисперсии.}
+\begin{document}
+\begingroup
+\makeatletter
+\renewcommand{\@fnsymbol}[1]{\ensuremath{\ifcase#1\or *\or\spadesuit\or\text{\tiny\faMountain}\or\clubsuit\or\dagger\or\ddagger\fi}}
+\let\origmakefntext\@makefntext
+\long\def\@makefntext#1{\rightskip\z@\@plus3em\relax\origmakefntext{#1}}
+\makeatother
+\maketitle
+\endgroup
+\begin{abstract}
+Рассматривается минимизация среднего $n$ выпуклых $(L_0,L_1)$-гладких
+функций: норма гессиана каждой из них ограничена аффинной функцией
+нормы её градиента. Предполагаются известными верхняя граница $R$ расстояния
+от начальной точки до точки минимума и верхняя граница $\delta$ разности между минимумом среднего и средним значением
+инфимумов слагаемых. Получены верхняя и нижняя оценки оракульной сложности
+достижения точности $\varepsilon$ по функции в среднем. С точностью до логарифмических множителей обе оценки имеют порядок
+\[
+ n\bigl(1+(L_1R)^{2/3}\bigr)
+ +\sqrt{\frac{n(L_0+L_1^2\delta)R^2}{\varepsilon}+n(L_1R)^2}.
+\]
+Верхняя оценка достигается предложенным методом YETI. Метод использует
+идеи ускоренных проксимальных методов и методов уменьшения дисперсии,
+а также эвристику для выбора дополнительных точек.
+Число обращений эвристики к оракулу ограничено, что позволяет
+сохранить верхнюю оценку общего числа запросов до достижения нужной точности.
+В экспериментах YETI сравнивается с методами первого порядка
+на синтетических задачах и задачах пуассоновской регрессии.
+Отдельно проверяются критерий остановки и влияние эвристики.
+Нижняя оценка получена явным построением
+семейств задач, трудных для любого метода первого порядка.
+\end{abstract}
+
+% Использование языковых моделей
+\begin{tcolorbox}[
+  optimbox,
+  colback=optimBlue!3!white,
+  colframe=optimBlue!40!white,
+  borderline west={1.4pt}{0pt}{optimBlue},
+  top=7pt,bottom=7pt
+]
+\small
+\noindent\textbf{Использование языковых моделей.}\enspace
+При получении теоретических результатов настоящей работы использовались
+модели \textit{Codex Astra 6} и \textit{Claude Opus 5.5}.
+Они также применялись при подготовке и вёрстке рукописи и для перевода
+исходного текста на английский язык.
+Однако каждая строка статьи, включая каждое утверждение, каждое
+доказательство и каждое вычисление, лично отредактирована и проверена
+авторами. Ответственность за корректность всех математических утверждений,
+доказательств и выводов несут исключительно авторы работы.
+\end{tcolorbox}
+
+\input{sections/introduction}
+\input{sections/setting}
+\input{sections/cheap}
+\input{sections/local_solver}
+\input{sections/cheap_analysis}
+\input{sections/experiments}
+\input{sections/lower}
+\input{sections/conclusion}
+% Литература сразу после основной части, мельче основного текста.
+\begingroup
+\selectlanguage{english}
+\renewcommand{\refname}{Литература}
+\renewcommand{\bibfont}{\small}
+\bibliographystyle{plainnat}
+\bibliography{refs}
+\endgroup
+% Приложения с новой страницы и мельче основного текста,
+% чтобы длинные выкладки помещались в строку.
+\clearpage
+\appendix
+\begingroup
+\small
+\input{sections/app_analytic}
+\input{sections/app_cheap_proofs}
+\input{sections/upper_constants}
+\InputIfFileExists{sections/app_lower_proofs}{}{}
+\input{sections/lower_constants}
+\input{sections/variants}
+\input{sections/app_literature}
+\endgroup
+\end{document}
